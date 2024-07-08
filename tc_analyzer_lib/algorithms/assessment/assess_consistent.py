@@ -26,8 +26,6 @@ def assess_consistent(
         consistently active
     WINDOW_D : int
         duration of sliding window (days)
-    n_consistent : list[int]
-        list of number of accounts that are continuously active
     all_consistent : dict[str, set[str]]
         dictionary with keys w_i and values
         containing a list of all account names that are continuously active
@@ -49,6 +47,6 @@ def assess_consistent(
 
     else:
         # store empty set
-        all_consistent[str(w_i)] = set("")
+        all_consistent[str(w_i)] = set()
 
     return all_consistent

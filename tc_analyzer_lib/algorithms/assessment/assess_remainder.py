@@ -74,7 +74,7 @@ def assess_remainder(
     """
 
     # if data from previous period is available
-    if (w_i - WINDOW_D >= 0) and (str(w_i - WINDOW_D) in all_active.keys()):
+    if (w_i - WINDOW_D >= 0) and (str(w_i - WINDOW_D) in all_active):
         # check if there is paused data from previous period
         #  and otherwise make empty set
         temp_set_paused = check_prev_period(all_paused, str(w_i - WINDOW_D))
@@ -109,7 +109,7 @@ def assess_remainder(
         temp_currently_paused = new_paused.union(temp_set_paused)
 
         # create temporary empty set result (will be updated in part 2 of 2)
-        all_paused[str(w_i)] = set("")
+        all_paused[str(w_i)] = set()
 
         # if data from previous previous period is available
         if w_i - 2 * WINDOW_D >= 0:
@@ -126,7 +126,7 @@ def assess_remainder(
             # # # RETURNED # # #
 
             # if there is disengaged data for this time period
-            if str(w_i - WINDOW_D) in all_disengaged.keys():
+            if str(w_i - WINDOW_D) in all_disengaged:
                 # obtain account names active now but disengaged WINDOW_D days ago
                 all_returned[str(w_i)] = set(
                     all_disengaged[str(w_i - WINDOW_D)]
@@ -134,7 +134,7 @@ def assess_remainder(
 
             else:
                 # store empty set for returned
-                all_returned[str(w_i)] = set("")
+                all_returned[str(w_i)] = set()
 
             # # # DISENGAGED # # #
 
@@ -186,12 +186,12 @@ def assess_remainder(
         all_new_active[str(w_i)] = set(all_active[str(w_i)])
 
         # set remaining activity types to empty string
-        all_paused[str(w_i)] = set("")
-        all_unpaused[str(w_i)] = set("")
-        all_returned[str(w_i)] = set("")
-        all_new_disengaged[str(w_i)] = set("")
-        all_disengaged[str(w_i)] = set("")
-        all_disengaged_in_past[str(w_i)] = set("")
+        all_paused[str(w_i)] = set()
+        all_unpaused[str(w_i)] = set()
+        all_returned[str(w_i)] = set()
+        all_new_disengaged[str(w_i)] = set()
+        all_disengaged[str(w_i)] = set()
+        all_disengaged_in_past[str(w_i)] = set()
 
     return (
         all_new_active,

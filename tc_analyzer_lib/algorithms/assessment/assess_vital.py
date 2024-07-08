@@ -47,6 +47,6 @@ def assess_vital(
 
     else:
         # store empty set
-        all_vital[str(w_i)] = set("")
+        all_vital[str(w_i)] = set()
 
     return all_vital

@@ -16,7 +16,7 @@ def test_assess_overlap():
     results_overlapping = []
     results_remainder = []
 
-    for w_i in reference_dict.keys():
+    for w_i in reference_dict:
         rem_acc, overlap_acc = assess_overlap(
             ref_dict=reference_dict, comp_dict=comparison_dict, w_i=int(w_i), num_past=0
         )

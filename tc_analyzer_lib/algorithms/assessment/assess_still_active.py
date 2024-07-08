@@ -56,6 +56,6 @@ def assess_still_active(
 
     else:
         # store empty set
-        all_still_active[str(w_i)] = set("")
+        all_still_active[str(w_i)] = set()
 
     return all_still_active

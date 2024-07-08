@@ -250,7 +250,7 @@ class EngagementAssessment:
         rem_new_disengaged = {}
 
         # if there is any disengagement data
-        if str(w_i) in all_new_disengaged.keys():
+        if str(w_i) in all_new_disengaged:
             # assess who was core before they disengaged
             (
                 rem_new_disengaged[str(w_i)],

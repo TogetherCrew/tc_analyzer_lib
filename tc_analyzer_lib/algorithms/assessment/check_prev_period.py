@@ -18,9 +18,9 @@ def check_prev_period(engagement_dict: dict[str, set[str]], time_str: str) -> se
     """
 
     # if engagement_dict contains data for time_str
-    if time_str in engagement_dict.keys():
+    if time_str in engagement_dict:
         temp_set = set(engagement_dict[time_str])
     else:
-        temp_set = set("")
+        temp_set = set()
 
     return temp_set

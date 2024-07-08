@@ -55,6 +55,6 @@ def assess_dropped(
 
     else:
         # store empty set
-        all_dropped[str(w_i)] = set("")
+        all_dropped[str(w_i)] = set()
 
     return all_dropped

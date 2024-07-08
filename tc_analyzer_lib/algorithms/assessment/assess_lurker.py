@@ -37,11 +37,7 @@ def assess_lurker(
     # if this is the first period
     else:
         # store all joined accounts as temp_lurkers
-        data = []
-        for member in all_joined_day[str(w_i)]:
-            if member not in data:
-                data.append(member)
-        temp_lurker = set(data)
+        temp_lurker = set(all_joined_day[str(w_i)])
 
     # remove newly active accounts from temp_lurker and store
     all_lurker[str(w_i)] = temp_lurker - all_new_active[str(w_i)]

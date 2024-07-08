@@ -1,4 +1,7 @@
-from tc_analyzer_lib.algorithms.assessment.utils.activity import BaseActivity, DiscordActivity
+from tc_analyzer_lib.algorithms.assessment.utils.activity import (
+    BaseActivity,
+    DiscordActivity,
+)
 
 
 def test_enum_discord_activity():

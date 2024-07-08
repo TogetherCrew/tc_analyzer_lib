@@ -1,6 +1,7 @@
 import numpy as np
 from tc_analyzer_lib.algorithms.assessment.utils.generate_graph import make_graph
 
+
 def test_graph_creation():
     """
     test if a graph created right

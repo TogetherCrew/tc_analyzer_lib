@@ -10,7 +10,7 @@ from tc_analyzer_lib.algorithms.compute_interaction_matrix_discord import (
 )
 from tc_analyzer_lib.DB_operations.mongodb_access import DB_access
 from tc_analyzer_lib.schemas.platform_configs.config_base import PlatformConfigBase
-from tc_core_analyzer_lib.assess_engagement import EngagementAssessment
+from tc_analyzer_lib.algorithms.assessment.engagement import EngagementAssessment
 
 
 def get_joined_accounts(db_access: DB_access, date_range: tuple[datetime, datetime]):

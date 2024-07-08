@@ -233,7 +233,7 @@ class MemberActivityPastUtils:
                         # a specific activity in an specific day
                         activity_dict[activity][str(idx)] = set(users_name)
                     else:
-                        activity_dict[activity][str(idx)] = set("")
+                        activity_dict[activity][str(idx)] = set()
                 except KeyError:
                     logging.error(
                         f"KeyError: the key {activity} is not available in DB record!"

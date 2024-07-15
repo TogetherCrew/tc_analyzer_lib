@@ -48,11 +48,30 @@ class HeatmapsUtils:
         users : list[str]
             a list of user ids doing activity in that day
         """
+        # cursor = self.database["rawmemberactivities"].aggregate(
+        #     [
+        #         {"$match": {"date": {"$gte": start_day, "$lt": end_day}}},
+        #         {"$unwind": "$interactions"},
+        #         {"$unwind": "$interactions.users_engaged_id"},
+        #         {
+        #             "$group": {
+        #                 "_id": None,
+        #                 "all_ids": {"$addToSet": "$interactions.users_engaged_id"},
+        #                 "author_ids": {"$addToSet": "$author_id"},
+        #             }
+        #         },
+        #         {
+        #             "$project": {
+        #                 "_id": 0,
+        #                 "combined_ids": {"$setUnion": ["$all_ids", "$author_ids"]},
+        #             }
+        #         },
+        #     ]
+        # )
+
         cursor = self.database["rawmemberactivities"].aggregate(
             [
                 {"$match": {"date": {"$gte": start_day, "$lt": end_day}}},
-                {"$unwind": "$interactions"},
-                {"$unwind": "$interactions.users_engaged_id"},
                 {
                     "$group": {
                         "_id": None,
@@ -63,7 +82,8 @@ class HeatmapsUtils:
                 {
                     "$project": {
                         "_id": 0,
-                        "combined_ids": {"$setUnion": ["$all_ids", "$author_ids"]},
+                        "combined_engaged_ids": {"$setUnion": ["$all_ids"]},
+                        "combined_author_ids": {"$setUnion": ["$author_ids"]},
                     }
                 },
             ]
@@ -71,9 +91,12 @@ class HeatmapsUtils:
 
         combined_ids = []
         for doc in cursor:
-            combined_ids.extend(doc.get("combined_ids", []))
+            combined_ids.extend(doc.get("combined_author_ids", []))
+            nested_list = doc.get("combined_engaged_ids", [])
+            combined_ids.extend(sum(sum(nested_list, []), []))
 
-        return combined_ids
+        # making the values to be unique
+        return list(set(combined_ids))
 
     def get_users_count(self, is_bot: bool = False) -> int:
         """

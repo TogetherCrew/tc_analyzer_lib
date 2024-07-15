@@ -19,7 +19,6 @@ class TestHeatmapsUtilsActiveUsers(TestCase):
         self.assertEqual(list(users), [])
 
     def test_get_multiple_users(self):
-
         start_day = datetime(2024, 1, 1)
         end_day = datetime(2024, 1, 2)
         samples = [

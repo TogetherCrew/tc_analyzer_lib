@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from unittest import TestCase
 
 from tc_analyzer_lib.metrics.heatmaps.heatmaps_utils import HeatmapsUtils
@@ -39,7 +39,7 @@ class TestHeatmapsUtilsActiveUsers(TestCase):
                     "channel_id": "1020707129214111827",
                     "thread_id": None,
                 },
-                "source_id": f"11188143219343360",
+                "source_id": "11188143219343360",
             },
             {
                 "actions": [],
@@ -57,7 +57,7 @@ class TestHeatmapsUtilsActiveUsers(TestCase):
                     "channel_id": "1020707129214111827",
                     "thread_id": None,
                 },
-                "source_id": f"11188143219343361",
+                "source_id": "11188143219343361",
             },
             {
                 "actions": [],
@@ -71,7 +71,7 @@ class TestHeatmapsUtilsActiveUsers(TestCase):
                     "channel_id": "1020707129214111827",
                     "thread_id": None,
                 },
-                "source_id": f"11188143219343361",
+                "source_id": "11188143219343361",
             },
         ]
         self.database["rawmemberactivities"].insert_many(samples)

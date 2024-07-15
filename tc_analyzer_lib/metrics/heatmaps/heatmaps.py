@@ -70,12 +70,9 @@ class Heatmaps:
         # initialize the data array
         heatmaps_results = []
 
-        users_count = self.utils.get_users_count()
-
         iteration_count = self._compute_iteration_counts(
             analytics_date=analytics_date,
             resources_count=len(self.resources),
-            authors_count=users_count,
         )
 
         index = 0
@@ -83,11 +80,18 @@ class Heatmaps:
             for resource_id in self.resources:
                 # for more efficient retrieval
                 # we're always using the cursor and re-querying the db
-                user_ids_cursor = self.utils.get_users()
 
-                for author in user_ids_cursor:
+                start_day = analytics_date.replace(
+                    hour=0, minute=0, second=0, microsecond=0
+                )
+                end_day = start_day + timedelta(days=1)
+                user_ids = self.utils.get_activity_users(start_day, end_day)
+
+                for idx, author in enumerate(user_ids):
                     logging.info(
-                        f"{log_prefix} ANALYZING HEATMAPS {index}/{iteration_count}"
+                        f"{log_prefix} ANALYZING HEATMAPS {index}/{iteration_count} "
+                        f"author index: {idx}/{len(user_ids)} | "
+                        f"DAY: {start_day.date()} - {end_day.date()}"
                     )
                     index += 1
 
@@ -251,10 +255,7 @@ class Heatmaps:
         self,
         analytics_date: datetime,
         resources_count: int,
-        authors_count: int,
     ) -> int:
-        iteration_count = (
-            (datetime.now() - analytics_date).days * resources_count * authors_count
-        )
+        iteration_count = (datetime.now() - analytics_date).days * resources_count
 
         return iteration_count

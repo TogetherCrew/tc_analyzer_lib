@@ -87,7 +87,7 @@ class Heatmaps:
                 end_day = start_day + timedelta(days=1)
                 user_ids = self.utils.get_activity_users(start_day, end_day)
 
-                for idx, author in enumerate(user_ids):
+                for idx, author_id in enumerate(user_ids):
                     logging.info(
                         f"{log_prefix} ANALYZING HEATMAPS {index}/{iteration_count} "
                         f"author index: {idx}/{len(user_ids)} | "
@@ -95,7 +95,6 @@ class Heatmaps:
                     )
                     index += 1
 
-                    author_id = author["id"]
                     doc_date = analytics_date.date()
                     document = {
                         self.analyzer_config.resource_identifier: resource_id,

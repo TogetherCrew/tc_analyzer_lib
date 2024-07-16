@@ -52,7 +52,11 @@ class TestHeatmapsAnalytics(TestCase):
                 "author_id": "9001",
                 "date": day + timedelta(hours=1),
                 "source_id": "10000",
-                "metadata": {"thread_id": "7000", "channel_id": "124"},
+                "metadata": {
+                    "thread_id": "7000",
+                    "channel_id": "124",
+                    "bot_activity": False,
+                },
                 "actions": [{"name": "message", "type": "emitter"}],
                 "interactions": [
                     {
@@ -68,7 +72,11 @@ class TestHeatmapsAnalytics(TestCase):
                 "author_id": "9001",
                 "date": day + timedelta(hours=1),
                 "source_id": "10005",
-                "metadata": {"thread_id": "7000", "channel_id": "124"},
+                "metadata": {
+                    "thread_id": "7000",
+                    "channel_id": "124",
+                    "bot_activity": False,
+                },
                 "actions": [],
                 "interactions": [
                     {
@@ -151,8 +159,8 @@ class TestHeatmapsAnalytics(TestCase):
         self.assertIsInstance(analytics, list)
 
         # 5 iteration for heatmaps analytics
-        # (1 resources) * (5 rawmember) * (1 day)
-        self.assertEqual(len(analytics), 5)
+        # (1 resources) * (6 rawmember) * (1 day)
+        self.assertEqual(len(analytics), 6)
 
         for i in range(5):
             if analytics[i]["user"] == "9001":

@@ -103,33 +103,24 @@ class AnalyticsHourly:
         start_day = datetime.combine(day, time(0, 0, 0))
         end_day = start_day + timedelta(days=1)
 
-        # if no filter for resources then
-        if resource_filters is None:
-            resource_filters = {}
-
         pipeline = [
-            # the day for analytics
             {
                 "$match": {
                     "date": {"$gte": start_day, "$lt": end_day},
                     "author_id": author_id,
-                    **resource_filters,
+                    **(resource_filters or {}),
                 }
             },
-            # Unwind the activity array
             {"$unwind": f"${activity}"},
         ]
-        if filters is not None:
-            pipeline.append(
-                {"$match": filters},
-            )
 
-        # we need to count each enaged user as an interaction
+        if filters:
+            pipeline.append({"$match": filters})
+
         if activity == "interactions":
             pipeline.extend(
                 [
                     {"$unwind": "$interactions.users_engaged_id"},
-                    # ignoring self-interactions
                     {
                         "$match": {
                             "$expr": {
@@ -142,21 +133,14 @@ class AnalyticsHourly:
 
         pipeline.extend(
             [
-                # Add a field for the hour of the day from the date field
                 {"$addFields": {"hour": {"$hour": "$date"}}},
-                # Group by the hour and count the number of mentions
                 {"$group": {"_id": "$hour", "count": {"$sum": 1}}},
-                # Project the results into the desired format
-                {"$sort": {"_id": 1}},  # sorted by hour
+                {"$sort": {"_id": 1}},
             ]
         )
 
-        # Execute the aggregation pipeline
-        cursor = self.collection.aggregate(pipeline)
-        results = list(cursor)
-
-        hourly_analytics = self._process_vectors(results)
-        return hourly_analytics
+        results = list(self.collection.aggregate(pipeline))
+        return self._process_vectors(results)
 
     def _process_vectors(
         self, analytics_mongo_results: list[dict[str, int]]
@@ -178,12 +162,7 @@ class AnalyticsHourly:
             a vector with length of 24
             each index representing the count of actions/interactions for that day
         """
-        hourly_analytics = np.zeros(24)
-
+        hourly_analytics = [0] * 24
         for analytics in analytics_mongo_results:
-            hour = analytics["_id"]
-            activity_count = analytics["count"]
-
-            hourly_analytics[hour] = activity_count
-
-        return list(hourly_analytics)
+            hourly_analytics[analytics["_id"]] = analytics["count"]
+        return hourly_analytics

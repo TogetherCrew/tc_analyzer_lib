@@ -50,8 +50,6 @@ class AnalyticsRaw:
             raw analytics item which holds the user and
             the count of interaction in that day
         """
-        additional_filters: dict[str, str] = kwargs.get("additional_filters", {})
-
         if activity_direction not in ["emitter", "receiver"]:
             raise ValueError(
                 "Wrong activity_direction given, "
@@ -71,7 +69,7 @@ class AnalyticsRaw:
             author_id=author_id,
             activity_name=activity_name,
             activity_direction=activity_direction,
-            filters=additional_filters,
+            filters=kwargs.get("additional_filters", {}),
         )
 
         return activity_count
@@ -114,38 +112,26 @@ class AnalyticsRaw:
             raw analytics item which holds the user and
             the count of interaction in that day
         """
-        filters: dict[str, dict[str, Any] | str] = kwargs.get("filters", {})
         start_day = datetime.combine(day, time(0, 0, 0))
         end_day = start_day + timedelta(days=1)
-
-        match_filters = {
-            "date": {"$gte": start_day, "$lt": end_day},
-            "author_id": author_id,
-            **filters,
-        }
 
         pipeline = [
             {
                 "$match": {
-                    **match_filters,
-                }
-            },
-            {"$unwind": f"${activity}"},
-            {
-                "$match": {
+                    "date": {"$gte": start_day, "$lt": end_day},
+                    "author_id": author_id,
+                    **kwargs.get("filters", {}),
                     f"{activity}.name": activity_name,
                     f"{activity}.type": activity_direction,
-                },
+                }
             },
             {"$unwind": f"${activity}.users_engaged_id"},
             {"$group": {"_id": f"${activity}.users_engaged_id", "count": {"$sum": 1}}},
+            {"$match": {"_id": {"$ne": author_id}}},
         ]
 
-        cursor = self.collection.aggregate(pipeline)
-        db_result = list(cursor)
-        activity_count = self._prepare_raw_analytics_item(author_id, db_result)
-
-        return activity_count
+        db_result = list(self.collection.aggregate(pipeline))
+        return self._prepare_raw_analytics_item(author_id, db_result)
 
     def _prepare_raw_analytics_item(
         self,
@@ -171,16 +157,9 @@ class AnalyticsRaw:
         raw_analytics : list[RawAnalyticsItem]
             the data in format of raw analytics item
         """
-        analytics: list[RawAnalyticsItem] = []
-        for data in activities_data:
-            if data["_id"] != author_id:
-                raw_analytics = RawAnalyticsItem(
-                    account=data["_id"],  # type: ignore
-                    count=data["count"],  # type: ignore
-                )
-                analytics.append(raw_analytics)
-            else:
-                # self interaction
-                logging.info("Skipping self-interaction!")
-
+        analytics = [
+            RawAnalyticsItem(account=data["_id"], count=data["count"])
+            for data in activities_data
+            if data["_id"] != author_id
+        ]
         return analytics

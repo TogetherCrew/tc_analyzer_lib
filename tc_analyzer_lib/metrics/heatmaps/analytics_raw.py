@@ -114,19 +114,15 @@ class AnalyticsRaw:
             raw analytics item which holds the user and
             the count of interaction in that day
         """
-        filters: dict[str, dict[str, Any] | str] | None = kwargs.get("filters")
+        filters: dict[str, dict[str, Any] | str] = kwargs.get("filters", {})
         start_day = datetime.combine(day, time(0, 0, 0))
         end_day = start_day + timedelta(days=1)
 
         match_filters = {
             "date": {"$gte": start_day, "$lt": end_day},
             "author_id": author_id,
+            **filters,
         }
-        if filters is not None:
-            match_filters = {
-                **match_filters,
-                **filters,
-            }
 
         pipeline = [
             {

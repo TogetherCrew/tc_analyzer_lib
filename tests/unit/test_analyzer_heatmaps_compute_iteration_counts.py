@@ -29,7 +29,6 @@ class TestAnalyzerHeatmapsIterationCount(TestCase):
 
         iteration_count = self.heatmaps._compute_iteration_counts(
             analytics_date=analytics_date,
-            resources_count=5,
         )
 
-        self.assertEqual(iteration_count, days * 5)  # five days
+        self.assertEqual(iteration_count, days)

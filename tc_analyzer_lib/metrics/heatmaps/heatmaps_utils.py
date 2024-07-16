@@ -33,7 +33,10 @@ class HeatmapsUtils:
         return cursor
 
     def get_active_users(
-        self, start_day: datetime, end_day: datetime, metadata_filter: dict = {}
+        self,
+        start_day: datetime,
+        end_day: datetime,
+        metadata_filter: dict | None = None,
     ) -> list[str]:
         """
         get the users doing activities for a specific period
@@ -44,35 +47,17 @@ class HeatmapsUtils:
             the time to filter the data from
         end_day : datetime
             the end day for filtering data from
-        metadata_filter : dict
+        metadata_filter : dict | None
             the additional filtering to be applied on data
-            default is no filtering which an empty dictionary will be passed
+            default is `None` which means no filtering
 
         Returns
         ---------
         users : list[str]
             a list of user ids doing activity in that day
         """
-        # cursor = self.database["rawmemberactivities"].aggregate(
-        #     [
-        #         {"$match": {"date": {"$gte": start_day, "$lt": end_day}}},
-        #         {"$unwind": "$interactions"},
-        #         {"$unwind": "$interactions.users_engaged_id"},
-        #         {
-        #             "$group": {
-        #                 "_id": None,
-        #                 "all_ids": {"$addToSet": "$interactions.users_engaged_id"},
-        #                 "author_ids": {"$addToSet": "$author_id"},
-        #             }
-        #         },
-        #         {
-        #             "$project": {
-        #                 "_id": 0,
-        #                 "combined_ids": {"$setUnion": ["$all_ids", "$author_ids"]},
-        #             }
-        #         },
-        #     ]
-        # )
+        if metadata_filter is None:
+            metadata_filter = {}
 
         cursor = self.database["rawmemberactivities"].aggregate(
             [
@@ -108,6 +93,66 @@ class HeatmapsUtils:
 
         # making the values to be unique
         return list(set(combined_ids))
+
+    def get_active_resources_period(
+        self,
+        start_day: datetime,
+        end_day: datetime,
+        resource_identifier: str,
+        metadata_filter: dict | None = None,
+    ) -> list[str]:
+        """
+        get the active resource ids for a specific period
+
+        Parameters
+        ------------
+        start_day : datetime
+            the time to filter the data from
+        end_day : datetime
+            the end day for filtering data from
+        resource_identifier : str
+            the resource identifier on database for a platform
+            i.e.: could be `channel_id` for discord
+        metadata_filter : dict | None
+            the additional filtering to be applied on data
+            default is `None` which means no filtering
+
+        Returns
+        ---------
+        resource_ids : list[str]
+            a list of user ids doing activity in that day
+        """
+        if metadata_filter is None:
+            metadata_filter = {}
+
+        pipeline = [
+            {
+                "$match": {
+                    "date": {
+                        "$gte": start_day,
+                        "$lt": end_day,
+                    },
+                    **metadata_filter,
+                }
+            },
+            {
+                "$group": {
+                    "_id": None,
+                    "unique_resource_ids": {
+                        "$addToSet": f"$metadata.{resource_identifier}"
+                    },
+                }
+            },
+            {"$project": {"_id": 0, "unique_resource_ids": 1}},
+        ]
+
+        results = self.database["rawmemberactivities"].aggregate(pipeline)
+
+        unique_resource_ids = []
+        for doc in results:
+            unique_resource_ids = doc.get("unique_resource_ids", [])
+
+        return unique_resource_ids
 
     def get_users_count(self, is_bot: bool = False) -> int:
         """

@@ -32,7 +32,9 @@ class HeatmapsUtils:
         )
         return cursor
 
-    def get_activity_users(self, start_day: datetime, end_day: datetime) -> list[str]:
+    def get_activity_users(
+            self, start_day: datetime, end_day: datetime, metadata_filter: dict = {}
+        ) -> list[str]:
         """
         get the users doing activities for a specific period
 
@@ -42,6 +44,9 @@ class HeatmapsUtils:
             the time to filter the data from
         end_day : datetime
             the end day for filtering data from
+        metadata_filter : dict
+            the additional filtering to be applied on data
+            default is no filtering which an empty dictionary will be passed
 
         Returns
         ---------
@@ -75,6 +80,7 @@ class HeatmapsUtils:
                     "$match": {
                         "date": {"$gte": start_day, "$lt": end_day},
                         "metadata.bot_activity": False,
+                        **metadata_filter,
                     }
                 },
                 {

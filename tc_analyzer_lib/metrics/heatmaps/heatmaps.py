@@ -88,11 +88,15 @@ class Heatmaps:
                     hour=0, minute=0, second=0, microsecond=0
                 )
                 end_day = start_day + timedelta(days=1)
-                user_ids = self.utils.get_activity_users(start_day, end_day)
+                user_ids = self.utils.get_activity_users(
+                    start_day, end_day, metadata_filter={
+                        "metadata." + self.analyzer_config.resource_identifier: resource_id,
+                    }
+                )
                 if len(user_ids) == 0:
                     logging.warning(
-                        f"{log_prefix} No users interacting for the time window "
-                        f"DAY: {start_day.date()} - {end_day.date()}"
+                        f"{log_prefix} No users interacting for the time window: "
+                        f"{start_day.date()} - {end_day.date()}"
                         " Skipping the day."
                     )
 

@@ -155,7 +155,6 @@ class TestHeatmapsAnalyticsSingleDay(TestCase):
         # resources doesn't match the raw data resources
         self.assertEqual(len(analytics), 0)
 
-
     def test_heatmaps_analytics_pre_filled(self):
         platform_id = self.heatmaps.platform_id
         day = (datetime.now() - timedelta(days=1)).replace(hour=0, minute=0, second=0)

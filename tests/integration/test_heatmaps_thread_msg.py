@@ -53,7 +53,7 @@ def test_thread_messages():
                     "metadata": {
                         "channel_id": chId,
                         "thread_id": chId + "THREAD",
-                        "bot_activity": False
+                        "bot_activity": False,
                     },
                 }
                 prepared_rawmemberactivities.append(prepared_rawdata)

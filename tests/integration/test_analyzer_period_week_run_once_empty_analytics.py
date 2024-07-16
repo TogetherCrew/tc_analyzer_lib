@@ -32,7 +32,7 @@ def test_analyzer_week_period_run_once_empty_analytics():
     rawinfo_samples = []
 
     # generating random rawinfo data
-    for i in range(155):
+    for i in range(160):
         author = np.random.choice(acc_id)
         replied_user = np.random.choice(acc_id)
         # not producing any self-interactions

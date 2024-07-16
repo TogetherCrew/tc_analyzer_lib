@@ -32,7 +32,7 @@ class HeatmapsUtils:
         )
         return cursor
 
-    def get_activity_users(
+    def get_active_users(
             self, start_day: datetime, end_day: datetime, metadata_filter: dict = {}
         ) -> list[str]:
         """

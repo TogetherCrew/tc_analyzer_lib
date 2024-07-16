@@ -75,6 +75,6 @@ class TestHeatmapsUtilsActiveUsers(TestCase):
         ]
         self.database["rawmemberactivities"].insert_many(samples)
 
-        users = self.utils.get_activity_users(start_day, end_day)
+        users = self.utils.get_active_users(start_day, end_day)
 
         self.assertEqual(set(users), set(["user1", "user2", "user4", "user5"]))

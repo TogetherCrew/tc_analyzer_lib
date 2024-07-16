@@ -88,7 +88,7 @@ class Heatmaps:
                     hour=0, minute=0, second=0, microsecond=0
                 )
                 end_day = start_day + timedelta(days=1)
-                user_ids = self.utils.get_activity_users(
+                user_ids = self.utils.get_active_users(
                     start_day, end_day, metadata_filter={
                         "metadata." + self.analyzer_config.resource_identifier: resource_id,
                     }

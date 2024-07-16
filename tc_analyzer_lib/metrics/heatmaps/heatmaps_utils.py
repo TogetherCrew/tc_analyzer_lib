@@ -33,7 +33,10 @@ class HeatmapsUtils:
         return cursor
 
     def get_active_users(
-        self, start_day: datetime, end_day: datetime, metadata_filter: dict = {}
+        self,
+        start_day: datetime,
+        end_day: datetime,
+        metadata_filter: dict | None = None,
     ) -> list[str]:
         """
         get the users doing activities for a specific period
@@ -44,15 +47,18 @@ class HeatmapsUtils:
             the time to filter the data from
         end_day : datetime
             the end day for filtering data from
-        metadata_filter : dict
+        metadata_filter : dict | None
             the additional filtering to be applied on data
-            default is no filtering which an empty dictionary will be passed
+            default is `None` which means no filtering
 
         Returns
         ---------
         users : list[str]
             a list of user ids doing activity in that day
         """
+        if metadata_filter is None:
+            metadata_filter = {}
+
         cursor = self.database["rawmemberactivities"].aggregate(
             [
                 {
@@ -93,7 +99,7 @@ class HeatmapsUtils:
         start_day: datetime,
         end_day: datetime,
         resource_identifier: str,
-        metadata_filter: dict = {},
+        metadata_filter: dict | None = None,
     ) -> list[str]:
         """
         get the active resource ids for a specific period
@@ -107,15 +113,18 @@ class HeatmapsUtils:
         resource_identifier : str
             the resource identifier on database for a platform
             i.e.: could be `channel_id` for discord
-        metadata_filter : dict
+        metadata_filter : dict | None
             the additional filtering to be applied on data
-            default is no filtering which an empty dictionary will be passed
+            default is `None` which means no filtering
 
         Returns
         ---------
         resource_ids : list[str]
             a list of user ids doing activity in that day
         """
+        if metadata_filter is None:
+            metadata_filter = {}
+
         pipeline = [
             {
                 "$match": {

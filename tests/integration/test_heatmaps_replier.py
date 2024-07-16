@@ -61,6 +61,7 @@ def test_reply_messages():
                         "metadata": {
                             "channel_id": chId,
                             "thread_id": None,
+                            "bot_activity": False,
                         },
                     },
                     {

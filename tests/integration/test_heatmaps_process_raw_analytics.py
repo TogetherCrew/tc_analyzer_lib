@@ -57,7 +57,11 @@ class TestHeatmapsProcessRawAnalyticsSingleDay(TestCase):
                 "author_id": 9001,
                 "date": datetime(2023, 1, 1, 2),
                 "source_id": "10000",
-                "metadata": {"thread_id": "7000", "channel_id": "124"},
+                "metadata": {
+                    "thread_id": "7000",
+                    "channel_id": "124",
+                    "bot_activity": False,
+                },
                 "actions": [{"name": "message", "type": "emitter"}],
                 "interactions": [
                     {
@@ -73,7 +77,11 @@ class TestHeatmapsProcessRawAnalyticsSingleDay(TestCase):
                 "author_id": 9001,
                 "date": day,
                 "source_id": "10001",
-                "metadata": {"thread_id": "7000", "channel_id": "124"},
+                "metadata": {
+                    "thread_id": "7000",
+                    "channel_id": "124",
+                    "bot_activity": False,
+                },
                 "actions": [{"name": "message", "type": "emitter"}],
                 "interactions": [
                     {
@@ -87,7 +95,11 @@ class TestHeatmapsProcessRawAnalyticsSingleDay(TestCase):
                 "author_id": 9001,
                 "date": datetime(2023, 1, 1, 2),
                 "source_id": "10000",
-                "metadata": {"thread_id": "7000", "channel_id": "124"},
+                "metadata": {
+                    "thread_id": "7000",
+                    "channel_id": "124",
+                    "bot_activity": False,
+                },
                 "actions": [{"name": "message", "type": "emitter"}],
                 "interactions": [
                     {
@@ -103,7 +115,11 @@ class TestHeatmapsProcessRawAnalyticsSingleDay(TestCase):
                 "author_id": 9001,
                 "date": datetime(2023, 1, 1, 4),
                 "source_id": "10001",
-                "metadata": {"thread_id": None, "channel_id": "124"},
+                "metadata": {
+                    "thread_id": None,
+                    "channel_id": "124",
+                    "bot_activity": False,
+                },
                 "actions": [{"name": "message", "type": "emitter"}],
                 "interactions": [
                     {
@@ -149,7 +165,11 @@ class TestHeatmapsProcessRawAnalyticsSingleDay(TestCase):
                 "author_id": 9001,
                 "date": datetime(2023, 1, 1, 2),
                 "source_id": "10000",
-                "metadata": {"thread_id": "7000", "channel_id": "124"},
+                "metadata": {
+                    "thread_id": "7000",
+                    "channel_id": "124",
+                    "bot_activity": False,
+                },
                 "actions": [{"name": "message", "type": "emitter"}],
                 "interactions": [
                     {
@@ -165,7 +185,11 @@ class TestHeatmapsProcessRawAnalyticsSingleDay(TestCase):
                 "author_id": 9001,
                 "date": day,
                 "source_id": "10001",
-                "metadata": {"thread_id": "7000", "channel_id": "124"},
+                "metadata": {
+                    "thread_id": "7000",
+                    "channel_id": "124",
+                    "bot_activity": False,
+                },
                 "actions": [{"name": "message", "type": "emitter"}],
                 "interactions": [
                     {
@@ -184,7 +208,11 @@ class TestHeatmapsProcessRawAnalyticsSingleDay(TestCase):
                 "author_id": 9002,
                 "date": datetime(2023, 1, 1, 2),
                 "source_id": "10000",
-                "metadata": {"thread_id": "7000", "channel_id": "124"},
+                "metadata": {
+                    "thread_id": "7000",
+                    "channel_id": "124",
+                    "bot_activity": False,
+                },
                 "actions": [{"name": "message", "type": "emitter"}],
                 "interactions": [
                     {
@@ -203,7 +231,11 @@ class TestHeatmapsProcessRawAnalyticsSingleDay(TestCase):
                 "author_id": 9001,
                 "date": datetime(2023, 1, 1, 4),
                 "source_id": "10001",
-                "metadata": {"thread_id": None, "channel_id": "124"},
+                "metadata": {
+                    "thread_id": None,
+                    "channel_id": "124",
+                    "bot_activity": False,
+                },
                 "actions": [{"name": "message", "type": "emitter"}],
                 "interactions": [
                     {

@@ -188,8 +188,9 @@ class Heatmaps:
                     activity_name=activity_name,
                     activity_direction=config.direction.value,
                     author_id=author_id,
-                    additional_filters={
+                    resource_filtering={
                         f"metadata.{self.analyzer_config.resource_identifier}": resource,
+                        "metadata.bot_activity": False,
                     },
                 )
                 analytics[config.name] = analytics_vector
@@ -213,8 +214,9 @@ class Heatmaps:
                     activity_name=activity_name,
                     activity_direction=config.direction.value,
                     author_id=author_id,
-                    additional_filters={
+                    resource_filtering={
                         f"metadata.{self.analyzer_config.resource_identifier}": resource,
+                        "metadata.bot_activity": False,
                         **conditions,
                     },
                 )
@@ -250,6 +252,7 @@ class Heatmaps:
 
             additional_filters: dict[str, str] = {
                 f"metadata.{self.analyzer_config.resource_identifier}": resource,
+                "metadata.bot_activity": False,
             }
             # preparing for custom analytics (if available in config)
             if config.rawmemberactivities_condition is not None:

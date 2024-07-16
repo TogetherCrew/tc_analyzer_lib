@@ -39,11 +39,10 @@ class AnalyticsHourly:
         activity_direction : str
             should be always either `emitter` or `receiver`
         **kwargs :
-            additional_filters : dict[str, str]
-                the additional filtering for `rawmemberactivities` data of each platform
-                the keys could be `metadata.channel_id` with a specific value
+            resource_filtering : dict[str, str]
+                a filtering applied for resources on data
         """
-        additional_filters: dict[str, str] = kwargs.get("additional_filters", {})
+        resource_filtering: dict[str, str] = kwargs.get("resource_filtering", {})
 
         if activity_direction not in ["emitter", "receiver"]:
             raise AttributeError(
@@ -64,8 +63,8 @@ class AnalyticsHourly:
             filters={
                 f"{activity}.name": activity_name,
                 f"{activity}.type": activity_direction,
-                **additional_filters,
             },
+            resource_filters=resource_filtering,
         )
 
         return activity_vector
@@ -76,6 +75,7 @@ class AnalyticsHourly:
         activity: str,
         author_id: str | int,
         filters: dict[str, dict[str, Any] | str] | None = None,
+        resource_filters: dict[str, str] | None = None,
     ) -> list[int]:
         """
         Gets the list of documents for the stated day
@@ -87,12 +87,12 @@ class AnalyticsHourly:
         activity : str
             to be `interactions` or `actions`
         filter : dict[str, dict[str] | str] | None
-            the filtering that we need to apply
+            the filtering that we need to apply on actions or interactions
             for default it is an None meaning
             no filtering would be applied
-        msg : str
-            additional information to be logged
-            for default is empty string meaning no additional string to log
+        resource_filtering : dict[str, str] | None
+            the filtering on resources of data
+            could make the query more efficient if provided
 
         Returns
         ---------
@@ -103,12 +103,17 @@ class AnalyticsHourly:
         start_day = datetime.combine(day, time(0, 0, 0))
         end_day = start_day + timedelta(days=1)
 
+        # if no filter for resources then
+        if resource_filters is None:
+            resource_filters = {}
+
         pipeline = [
             # the day for analytics
             {
                 "$match": {
                     "date": {"$gte": start_day, "$lt": end_day},
                     "author_id": author_id,
+                    **resource_filters,
                 }
             },
             # Unwind the activity array

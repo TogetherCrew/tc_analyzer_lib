@@ -60,6 +60,7 @@ def test_mentioned_messages():
                         "metadata": {
                             "channel_id": chId,
                             "thread_id": None,
+                            "bot_activity": False,
                         },
                     }
                     prepared_rawmemberactivities.append(prepared_rawdata)
@@ -80,6 +81,7 @@ def test_mentioned_messages():
                         "metadata": {
                             "channel_id": chId,
                             "thread_id": chId + "AAA",  # could be thr_message
+                            "bot_activity": False,
                         },
                     }
                     prepared_rawmemberactivities.append(rawdata_self_interaction)

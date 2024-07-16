@@ -47,6 +47,17 @@ def test_excluding_bots_heatmaps():
     for i in range(720):
         author = acc_id[i % len(acc_id)]
         replied_user = np.random.choice(acc_id)
+
+        if author in ["bot0", "bot1", "bot2"]:
+            author_bot_activity = True
+        else:
+            author_bot_activity = False
+
+        if replied_user in ["bot0", "bot1", "bot2"]:
+            replied_bot_activity = True
+        else:
+            replied_bot_activity = False
+
         samples = [
             {
                 "actions": [{"name": "message", "type": "emitter"}],
@@ -60,7 +71,7 @@ def test_excluding_bots_heatmaps():
                     }
                 ],
                 "metadata": {
-                    "bot_activity": False,
+                    "bot_activity": author_bot_activity,
                     "channel_id": "1020707129214111827",
                     "thread_id": None,
                 },
@@ -74,7 +85,7 @@ def test_excluding_bots_heatmaps():
                     {"name": "reply", "type": "receiver", "users_engaged_id": [author]}
                 ],
                 "metadata": {
-                    "bot_activity": False,
+                    "bot_activity": replied_bot_activity,
                     "channel_id": "1020707129214111827",
                     "thread_id": None,
                 },

@@ -70,28 +70,52 @@ class Heatmaps:
         # initialize the data array
         heatmaps_results = []
 
-        users_count = self.utils.get_users_count()
-
         iteration_count = self._compute_iteration_counts(
             analytics_date=analytics_date,
             resources_count=len(self.resources),
-            authors_count=users_count,
         )
+
+        cursor = self.utils.get_users(is_bot=True)
+        bot_ids = list(map(lambda user: user["id"], cursor))
 
         index = 0
         while analytics_date.date() < datetime.now().date():
             for resource_id in self.resources:
                 # for more efficient retrieval
                 # we're always using the cursor and re-querying the db
-                user_ids_cursor = self.utils.get_users()
 
-                for author in user_ids_cursor:
-                    logging.info(
-                        f"{log_prefix} ANALYZING HEATMAPS {index}/{iteration_count}"
+                start_day = analytics_date.replace(
+                    hour=0, minute=0, second=0, microsecond=0
+                )
+                end_day = start_day + timedelta(days=1)
+                user_ids = self.utils.get_active_users(
+                    start_day,
+                    end_day,
+                    metadata_filter={
+                        "metadata."
+                        + self.analyzer_config.resource_identifier: resource_id,
+                    },
+                )
+                if len(user_ids) == 0:
+                    logging.warning(
+                        f"{log_prefix} No users interacting for the time window: "
+                        f"{start_day.date()} - {end_day.date()}"
+                        " Skipping the day."
                     )
-                    index += 1
 
-                    author_id = author["id"]
+                for idx, author_id in enumerate(user_ids):
+                    logging.info(
+                        f"{log_prefix} ANALYZING HEATMAPS {index}/{iteration_count} "
+                        f"author index: {idx}/{len(user_ids)} | "
+                        f"DAY: {start_day.date()} - {end_day.date()}"
+                    )
+
+                    if author_id in bot_ids:
+                        logging.warning(
+                            f"User id: {author_id} is bot, Skipping analytics for it"
+                        )
+                        continue
+
                     doc_date = analytics_date.date()
                     document = {
                         self.analyzer_config.resource_identifier: resource_id,
@@ -112,6 +136,8 @@ class Heatmaps:
                     document = {**document, **hourly_analytics, **raw_analytics}
 
                     heatmaps_results.append(document)
+
+                index += 1
 
             # analyze next day
             analytics_date += timedelta(days=1)
@@ -251,10 +277,7 @@ class Heatmaps:
         self,
         analytics_date: datetime,
         resources_count: int,
-        authors_count: int,
     ) -> int:
-        iteration_count = (
-            (datetime.now() - analytics_date).days * resources_count * authors_count
-        )
+        iteration_count = (datetime.now() - analytics_date).days * resources_count
 
         return iteration_count

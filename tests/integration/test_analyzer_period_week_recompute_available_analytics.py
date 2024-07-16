@@ -46,6 +46,10 @@ def test_analyzer_week_period_recompute_available_analytics():
     heatmaps_data = create_empty_heatmaps_data(start_day, count=1)
     db_access.db_mongo_client[platform_id]["heatmaps"].insert_many(heatmaps_data)
 
+    yesterday = (datetime.now() - timedelta(days=1)).replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
+
     # generating rawinfo samples
     rawinfo_samples = []
 
@@ -59,7 +63,7 @@ def test_analyzer_week_period_recompute_available_analytics():
             {
                 "actions": [{"name": "message", "type": "emitter"}],
                 "author_id": author,
-                "date": datetime.now() - timedelta(hours=i),
+                "date": yesterday - timedelta(hours=i),
                 "interactions": [
                     {
                         "name": "reply",
@@ -77,7 +81,7 @@ def test_analyzer_week_period_recompute_available_analytics():
             {
                 "actions": [],
                 "author_id": replied_user,
-                "date": datetime.now() - timedelta(hours=i),
+                "date": yesterday - timedelta(hours=i),
                 "interactions": [
                     {"name": "reply", "type": "receiver", "users_engaged_id": [author]}
                 ],
@@ -99,9 +103,7 @@ def test_analyzer_week_period_recompute_available_analytics():
 
     memberactivities_cursor = db_access.query_db_find("memberactivities", {})
     memberactivities_data = list(memberactivities_cursor)
-    yesterday = (datetime.now() - timedelta(days=1)).replace(
-        hour=0, minute=0, second=0, microsecond=0
-    )
+
 
     memberactivities_expected_dates = [
         yesterday,

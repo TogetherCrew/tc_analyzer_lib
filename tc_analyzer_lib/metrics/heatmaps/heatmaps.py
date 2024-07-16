@@ -89,9 +89,12 @@ class Heatmaps:
                 )
                 end_day = start_day + timedelta(days=1)
                 user_ids = self.utils.get_active_users(
-                    start_day, end_day, metadata_filter={
-                        "metadata." + self.analyzer_config.resource_identifier: resource_id,
-                    }
+                    start_day,
+                    end_day,
+                    metadata_filter={
+                        "metadata."
+                        + self.analyzer_config.resource_identifier: resource_id,
+                    },
                 )
                 if len(user_ids) == 0:
                     logging.warning(

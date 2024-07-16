@@ -104,7 +104,6 @@ def test_analyzer_week_period_recompute_available_analytics():
     memberactivities_cursor = db_access.query_db_find("memberactivities", {})
     memberactivities_data = list(memberactivities_cursor)
 
-
     memberactivities_expected_dates = [
         yesterday,
         (yesterday - timedelta(days=1)),

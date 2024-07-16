@@ -33,8 +33,8 @@ class HeatmapsUtils:
         return cursor
 
     def get_active_users(
-            self, start_day: datetime, end_day: datetime, metadata_filter: dict = {}
-        ) -> list[str]:
+        self, start_day: datetime, end_day: datetime, metadata_filter: dict = {}
+    ) -> list[str]:
         """
         get the users doing activities for a specific period
 

@@ -71,7 +71,12 @@ class HeatmapsUtils:
 
         cursor = self.database["rawmemberactivities"].aggregate(
             [
-                {"$match": {"date": {"$gte": start_day, "$lt": end_day}}},
+                {
+                    "$match": {
+                        "date": {"$gte": start_day, "$lt": end_day},
+                        "metadata.bot_activity": False,
+                    }
+                },
                 {
                     "$group": {
                         "_id": None,

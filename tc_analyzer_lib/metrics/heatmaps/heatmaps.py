@@ -75,6 +75,9 @@ class Heatmaps:
             resources_count=len(self.resources),
         )
 
+        cursor = self.utils.get_users(is_bot=True)
+        bot_ids = list(map(lambda user: user["id"], cursor))
+
         index = 0
         while analytics_date.date() < datetime.now().date():
             for resource_id in self.resources:
@@ -99,6 +102,12 @@ class Heatmaps:
                         f"author index: {idx}/{len(user_ids)} | "
                         f"DAY: {start_day.date()} - {end_day.date()}"
                     )
+
+                    if author_id in bot_ids:
+                        logging.warning(
+                            f"User id: {author_id} is bot, Skipping analytics for it"
+                        )
+                        continue
 
                     doc_date = analytics_date.date()
                     document = {

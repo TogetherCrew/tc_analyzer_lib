@@ -86,6 +86,12 @@ class Heatmaps:
                 )
                 end_day = start_day + timedelta(days=1)
                 user_ids = self.utils.get_activity_users(start_day, end_day)
+                if len(user_ids) == 0:
+                    logging.warning(
+                        f"{log_prefix} No users interacting for the time window "
+                        f"DAY: {start_day.date()} - {end_day.date()}"
+                        " Skipping the day."
+                    )
 
                 for idx, author_id in enumerate(user_ids):
                     logging.info(
@@ -93,7 +99,6 @@ class Heatmaps:
                         f"author index: {idx}/{len(user_ids)} | "
                         f"DAY: {start_day.date()} - {end_day.date()}"
                     )
-                    index += 1
 
                     doc_date = analytics_date.date()
                     document = {
@@ -115,6 +120,8 @@ class Heatmaps:
                     document = {**document, **hourly_analytics, **raw_analytics}
 
                     heatmaps_results.append(document)
+
+                index += 1
 
             # analyze next day
             analytics_date += timedelta(days=1)

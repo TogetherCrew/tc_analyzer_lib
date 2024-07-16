@@ -53,27 +53,6 @@ class HeatmapsUtils:
         users : list[str]
             a list of user ids doing activity in that day
         """
-        # cursor = self.database["rawmemberactivities"].aggregate(
-        #     [
-        #         {"$match": {"date": {"$gte": start_day, "$lt": end_day}}},
-        #         {"$unwind": "$interactions"},
-        #         {"$unwind": "$interactions.users_engaged_id"},
-        #         {
-        #             "$group": {
-        #                 "_id": None,
-        #                 "all_ids": {"$addToSet": "$interactions.users_engaged_id"},
-        #                 "author_ids": {"$addToSet": "$author_id"},
-        #             }
-        #         },
-        #         {
-        #             "$project": {
-        #                 "_id": 0,
-        #                 "combined_ids": {"$setUnion": ["$all_ids", "$author_ids"]},
-        #             }
-        #         },
-        #     ]
-        # )
-
         cursor = self.database["rawmemberactivities"].aggregate(
             [
                 {

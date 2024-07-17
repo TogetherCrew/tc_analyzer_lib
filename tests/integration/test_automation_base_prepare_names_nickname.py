@@ -11,7 +11,7 @@ def test_prepare_ngu_some_data_nickname_strategy():
     the output should be have the names of the field `nickname`
     """
     platform_id = "515151515151515151515151"
-    db_access = launch_db_access(platform_id)
+    db_access = launch_db_access(platform_id, skip_singleton=True)
 
     db_access.db_mongo_client[platform_id].drop_collection("guildmembers")
 

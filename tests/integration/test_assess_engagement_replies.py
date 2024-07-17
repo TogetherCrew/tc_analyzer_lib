@@ -14,7 +14,7 @@ from .utils.setup_platform import setup_platform
 class TestAssessEngagementReplies(IsolatedAsyncioTestCase):
     def setUp(self) -> None:
         platform_id = "515151515151515151515151"
-        self.db_access = launch_db_access(platform_id)
+        self.db_access = launch_db_access(platform_id, skip_singleton=True)
         self.create_db_connections()
 
         period = datetime(2024, 1, 1)

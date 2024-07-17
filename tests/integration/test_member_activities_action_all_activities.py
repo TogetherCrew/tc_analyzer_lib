@@ -8,7 +8,7 @@ from .utils.setup_platform import setup_platform
 class TestMemberActivitiesActionsAllActivities(IsolatedAsyncioTestCase):
     def setUp(self) -> None:
         self.platformId = "1234"
-        self.db_access = launch_db_access(self.platformId)
+        self.db_access = launch_db_access(self.platformId, skip_singleton=True)
 
     async def test_single_user_action(self):
         """

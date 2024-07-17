@@ -10,7 +10,7 @@ def test_two_weeks_period_active_members():
     test all_active members for the two weeks period in the new schema
     """
     platform_id = "60d5ec44f9a3c2b6d7e2d11a"
-    db_access = launch_db_access(platform_id)
+    db_access = launch_db_access(platform_id, skip_singleton=True)
 
     acc_id = [
         "user0",

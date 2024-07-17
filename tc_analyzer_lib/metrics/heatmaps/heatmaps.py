@@ -75,13 +75,13 @@ class Heatmaps:
             bot_ids.append(bot["id"])
 
         while analytics_date.date() < datetime.now().date():
-            logging.info(
-                f"{log_prefix} ANALYZING HEATMAPS {start_day.date()} - {end_day.date()}!"
-            )
             start_day = analytics_date.replace(
                 hour=0, minute=0, second=0, microsecond=0
             )
             end_day = start_day + timedelta(days=1)
+            logging.info(
+                f"{log_prefix} ANALYZING HEATMAPS {start_day.date()} - {end_day.date()}!"
+            )
 
             # getting the active resource_ids (activities being done there by users)
             period_resources = await self.utils.get_active_resources_period(

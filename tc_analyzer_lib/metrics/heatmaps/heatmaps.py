@@ -74,8 +74,10 @@ class Heatmaps:
         async for bot in cursor:
             bot_ids.append(bot["id"])
 
-        # index = 0
         while analytics_date.date() < datetime.now().date():
+            logging.info(
+                f"{log_prefix} ANALYZING HEATMAPS {start_day.date()} - {end_day.date()}!"
+            )
             start_day = analytics_date.replace(
                 hour=0, minute=0, second=0, microsecond=0
             )
@@ -98,7 +100,7 @@ class Heatmaps:
                     f"{start_day.date()} - {end_day.date()}"
                 )
 
-            for resource_idx, resource_id in enumerate(period_resources):
+            for _, resource_id in enumerate(period_resources):
                 user_ids = await self.utils.get_active_users(
                     start_day,
                     end_day,
@@ -114,18 +116,9 @@ class Heatmaps:
                         " Skipping the day."
                     )
 
-                for user_idx, author_id in enumerate(user_ids):
-                    logging.info(
-                        f"{log_prefix} ANALYZING HEATMAPS {start_day.date()} - {end_day.date()} | "
-                        # f"DAY {index}/{iteration_count} "
-                        f"Author: {user_idx + 1}/{len(user_ids)} "
-                        f"of resource: {resource_idx + 1}/{len(period_resources)}"
-                    )
-
+                for _, author_id in enumerate(user_ids):
+                    # skipping doing analytics for bots
                     if author_id in bot_ids:
-                        logging.warning(
-                            f"User id: {author_id} is bot, Skipping analytics for it"
-                        )
                         continue
 
                     doc_date = analytics_date.date()
@@ -148,8 +141,6 @@ class Heatmaps:
                     document = {**document, **hourly_analytics, **raw_analytics}
 
                     heatmaps_results.append(document)
-
-                # index += 1
 
             # analyze next day
             analytics_date += timedelta(days=1)

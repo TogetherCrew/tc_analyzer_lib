@@ -1,24 +1,30 @@
 from datetime import datetime
-from unittest import TestCase
+from typing import Any, Coroutine
+from unittest import IsolatedAsyncioTestCase
 
 from tc_analyzer_lib.metrics.heatmaps.heatmaps_utils import HeatmapsUtils
 from tc_analyzer_lib.utils.mongo import MongoSingleton
 
 
-class TestHeatmapsUtils(TestCase):
-    def setUp(self) -> None:
-        client = MongoSingleton.get_instance().get_client()
+class TestHeatmapsUtils(IsolatedAsyncioTestCase):
+    async def asyncSetUp(self) -> Coroutine[Any, Any, None]:
         self.platform_id = "1234567890"
+        self.mongo_singleton = MongoSingleton.get_instance(skip_singleton=True)
+        client = self.mongo_singleton.get_async_client()
         self.database = client[self.platform_id]
-        self.database.drop_collection("rawmembers")
-
         self.utils = HeatmapsUtils(self.platform_id)
+        await self.database.drop_collection("rawmembers")
 
-    def test_get_users_empty_collection(self):
-        users = self.utils.get_users()
-        self.assertEqual(list(users), [])
+    async def test_get_users_empty_collection(self):
+        cursor = await self.utils.get_users()
+        users = []
+        async for user in cursor:
+            users.append(user)
+        self.assertEqual(users, [])
 
-    def test_get_real_users(self):
+        self.database.client.close()
+
+    async def test_get_real_users(self):
         sample_users = [
             {
                 "id": 9000,
@@ -42,13 +48,16 @@ class TestHeatmapsUtils(TestCase):
                 "options": {},
             },
         ]
-        self.database["rawmembers"].insert_many(sample_users)
+        await self.database["rawmembers"].insert_many(sample_users)
 
-        users = self.utils.get_users()
+        cursor = await self.utils.get_users()
+        users = []
+        async for user in cursor:
+            users.append(user)
+        self.assertEqual(users, [{"id": 9000}, {"id": 9001}])
+        self.database.client.close()
 
-        self.assertEqual(list(users), [{"id": 9000}, {"id": 9001}])
-
-    def test_get_bots(self):
+    async def test_get_bots(self):
         sample_users = [
             {
                 "id": 9000,
@@ -72,18 +81,21 @@ class TestHeatmapsUtils(TestCase):
                 "options": {},
             },
         ]
-        self.database["rawmembers"].insert_many(sample_users)
+        await self.database["rawmembers"].insert_many(sample_users)
 
-        users = self.utils.get_users(is_bot=True)
+        cursor = await self.utils.get_users(is_bot=True)
+        users = []
+        async for user in cursor:
+            users.append(user)
 
-        self.assertEqual(list(users), [{"id": 9001}, {"id": 9002}])
+        self.assertEqual(users, [{"id": 9001}, {"id": 9002}])
 
-    def test_get_users_count_empty_data(self):
-        count = self.utils.get_users_count()
+    async def test_get_users_count_empty_data(self):
+        count = await self.utils.get_users_count()
         self.assertIsInstance(count, int)
         self.assertEqual(count, 0)
 
-    def test_get_users_count_real_users(self):
+    async def test_get_users_count_real_users(self):
         sample_users = [
             {
                 "id": 9000,
@@ -107,13 +119,13 @@ class TestHeatmapsUtils(TestCase):
                 "options": {},
             },
         ]
-        self.database["rawmembers"].insert_many(sample_users)
+        await self.database["rawmembers"].insert_many(sample_users)
 
-        count = self.utils.get_users_count()
+        count = await self.utils.get_users_count()
         self.assertIsInstance(count, int)
         self.assertEqual(count, 2)
 
-    def test_get_users_count_bots(self):
+    async def test_get_users_count_bots(self):
         sample_users = [
             {
                 "id": 9000,
@@ -151,21 +163,21 @@ class TestHeatmapsUtils(TestCase):
                 "options": {},
             },
         ]
-        self.database["rawmembers"].insert_many(sample_users)
+        await self.database["rawmembers"].insert_many(sample_users)
 
-        count = self.utils.get_users_count(is_bot=True)
+        count = await self.utils.get_users_count(is_bot=True)
         self.assertIsInstance(count, int)
         self.assertEqual(count, 3)
 
-    def test_get_last_date_no_document(self):
-        self.database.drop_collection("heatmaps")
+    async def test_get_last_date_no_document(self):
+        await self.database.drop_collection("heatmaps")
 
-        last_date = self.utils.get_last_date()
+        last_date = await self.utils.get_last_date()
 
         self.assertIsNone(last_date)
 
-    def test_get_last_date_single_document(self):
-        self.database.drop_collection("heatmaps")
+    async def test_get_last_date_single_document(self):
+        await self.database.drop_collection("heatmaps")
 
         document = {
             "user": 9000,
@@ -174,13 +186,13 @@ class TestHeatmapsUtils(TestCase):
             "hourly_analytics": [],
             "raw_analytics": [],
         }
-        self.database["heatmaps"].insert_one(document)
+        await self.database["heatmaps"].insert_one(document)
 
-        last_date = self.utils.get_last_date()
+        last_date = await self.utils.get_last_date()
         self.assertEqual(last_date, datetime(2023, 1, 1))
 
-    def test_get_last_date_multiple_documents(self):
-        self.database.drop_collection("heatmaps")
+    async def test_get_last_date_multiple_documents(self):
+        await self.database.drop_collection("heatmaps")
 
         documents = [
             {
@@ -205,7 +217,7 @@ class TestHeatmapsUtils(TestCase):
                 "raw_analytics": [],
             },
         ]
-        self.database["heatmaps"].insert_many(documents)
+        await self.database["heatmaps"].insert_many(documents)
 
-        last_date = self.utils.get_last_date()
+        last_date = await self.utils.get_last_date()
         self.assertEqual(last_date, datetime(2023, 1, 3))

@@ -8,12 +8,12 @@ from tc_analyzer_lib.utils.mongo import MongoSingleton
 
 class AnalyticsRaw:
     def __init__(self, platform_id: str) -> None:
-        client = MongoSingleton.get_instance().get_client()
+        client = MongoSingleton.get_instance().get_async_client()
         # `rawmemberactivities` is the collection we would use for analytics
         self.collection = client[platform_id]["rawmemberactivities"]
         self.msg_prefix = f"PLATFORMID: {platform_id}:"
 
-    def analyze(
+    async def analyze(
         self,
         day: date,
         activity: str,
@@ -63,7 +63,7 @@ class AnalyticsRaw:
                 f" The provided one is {activity}"
             )
 
-        activity_count = self.get_analytics_count(
+        activity_count = await self.get_analytics_count(
             day=day,
             activity=activity,
             author_id=author_id,
@@ -74,7 +74,7 @@ class AnalyticsRaw:
 
         return activity_count
 
-    def get_analytics_count(
+    async def get_analytics_count(
         self,
         day: date,
         activity: str,
@@ -130,8 +130,14 @@ class AnalyticsRaw:
             {"$match": {"_id": {"$ne": author_id}}},
         ]
 
-        db_result = list(self.collection.aggregate(pipeline))
-        return self._prepare_raw_analytics_item(author_id, db_result)
+        results = await self.get_aggregate_results(pipeline)
+        return self._prepare_raw_analytics_item(author_id, results)
+
+    async def get_aggregate_results(self, pipeline):
+        results = []
+        async for doc in self.collection.aggregate(pipeline):
+            results.append(doc)
+        return results
 
     def _prepare_raw_analytics_item(
         self,

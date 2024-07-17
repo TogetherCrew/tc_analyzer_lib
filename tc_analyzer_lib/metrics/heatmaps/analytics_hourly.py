@@ -7,12 +7,12 @@ from tc_analyzer_lib.utils.mongo import MongoSingleton
 
 class AnalyticsHourly:
     def __init__(self, platform_id: str) -> None:
-        client = MongoSingleton.get_instance().get_client()
+        client = MongoSingleton.get_instance().get_async_client()
         # `rawmemberactivities` is the collection we would use for analytics
         self.collection = client[platform_id]["rawmemberactivities"]
         self.msg_prefix = f"PLATFORMID: {platform_id}:"
 
-    def analyze(
+    async def analyze(
         self,
         day: date,
         activity: str,
@@ -56,7 +56,7 @@ class AnalyticsHourly:
                 "should be either `interactions` or `actions`"
             )
 
-        activity_vector = self.get_hourly_analytics(
+        activity_vector = await self.get_hourly_analytics(
             day=day,
             activity=activity,
             author_id=author_id,
@@ -69,7 +69,7 @@ class AnalyticsHourly:
 
         return activity_vector
 
-    def get_hourly_analytics(
+    async def get_hourly_analytics(
         self,
         day: date,
         activity: str,
@@ -139,8 +139,14 @@ class AnalyticsHourly:
             ]
         )
 
-        results = list(self.collection.aggregate(pipeline))
+        results = await self.get_aggregate_results(pipeline)
         return self._process_vectors(results)
+
+    async def get_aggregate_results(self, pipeline):
+        results = []
+        async for doc in self.collection.aggregate(pipeline):
+            results.append(doc)
+        return results
 
     def _process_vectors(
         self, analytics_mongo_results: list[dict[str, int]]

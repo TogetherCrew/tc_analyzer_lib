@@ -1,12 +1,13 @@
+import asyncio
 from datetime import datetime
-from unittest import TestCase
+from unittest import IsolatedAsyncioTestCase
 
 from tc_analyzer_lib.metrics.heatmaps import Heatmaps
 from tc_analyzer_lib.schemas.platform_configs import DiscordAnalyzerConfig
 from tc_analyzer_lib.utils.mongo import MongoSingleton
 
 
-class TestHeatmapsProcessHourlySingleDay(TestCase):
+class TestHeatmapsProcessHourlySingleDay(IsolatedAsyncioTestCase):
     def setUp(self) -> None:
         platform_id = "1234567890"
         period = datetime(2024, 1, 1)
@@ -21,17 +22,21 @@ class TestHeatmapsProcessHourlySingleDay(TestCase):
             resources=resources,
             analyzer_config=discord_analyzer_config,
         )
-        self.mongo_client = MongoSingleton.get_instance().get_client()
+        self.mongo_client = MongoSingleton.get_instance(
+            skip_singleton=True
+        ).get_client()
         self.mongo_client[platform_id].drop_collection("rawmemberactivities")
         self.mongo_client[platform_id].drop_collection("heatmaps")
 
     def test_process_hourly_check_return_type(self):
         day = datetime(2023, 1, 1)
 
-        hourly_analytics = self.heatmaps._process_hourly_analytics(
-            day,
-            resource="124",
-            author_id=9001,
+        hourly_analytics = asyncio.run(
+            self.heatmaps._process_hourly_analytics(
+                day,
+                resource="124",
+                author_id=9001,
+            )
         )
 
         self.assertIsInstance(hourly_analytics, dict)
@@ -154,10 +159,12 @@ class TestHeatmapsProcessHourlySingleDay(TestCase):
             sample_raw_data
         )
 
-        hourly_analytics = self.heatmaps._process_hourly_analytics(
-            day,
-            resource="124",
-            author_id=9001,
+        hourly_analytics = asyncio.run(
+            self.heatmaps._process_hourly_analytics(
+                day,
+                resource="124",
+                author_id=9001,
+            )
         )
 
         self.assertEqual(hourly_analytics["mentioner"][0], 2)
@@ -269,10 +276,12 @@ class TestHeatmapsProcessHourlySingleDay(TestCase):
             sample_raw_data
         )
 
-        hourly_analytics = self.heatmaps._process_hourly_analytics(
-            day,
-            resource="125",
-            author_id=9001,
+        hourly_analytics = asyncio.run(
+            self.heatmaps._process_hourly_analytics(
+                day,
+                resource="125",
+                author_id=9001,
+            )
         )
 
         self.assertEqual(sum(hourly_analytics["mentioned"]), 0)
@@ -369,10 +378,12 @@ class TestHeatmapsProcessHourlySingleDay(TestCase):
             sample_raw_data
         )
 
-        hourly_analytics = self.heatmaps._process_hourly_analytics(
-            day,
-            resource="124",
-            author_id=9005,
+        hourly_analytics = asyncio.run(
+            self.heatmaps._process_hourly_analytics(
+                day,
+                resource="124",
+                author_id=9005,
+            )
         )
 
         self.assertEqual(sum(hourly_analytics["mentioned"]), 0)

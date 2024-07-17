@@ -1,12 +1,12 @@
 from datetime import datetime, timedelta
-from unittest import TestCase
+from unittest import IsolatedAsyncioTestCase
 
 from tc_analyzer_lib.metrics.heatmaps import Heatmaps
 from tc_analyzer_lib.schemas.platform_configs import DiscordAnalyzerConfig
 from tc_analyzer_lib.utils.mongo import MongoSingleton
 
 
-class TestHeatmapsAnalytics(TestCase):
+class TestHeatmapsAnalytics(IsolatedAsyncioTestCase):
     def setUp(self) -> None:
         platform_id = "1234567890"
         period = (datetime.now() - timedelta(days=1)).replace(
@@ -33,7 +33,7 @@ class TestHeatmapsAnalytics(TestCase):
         )
         self.mongo_client[self.heatmaps.platform_id].drop_collection("rawmembers")
 
-    def test_heatmaps_single_day_from_start(self):
+    async def test_heatmaps_single_day_from_start(self):
         platform_id = self.heatmaps.platform_id
         day = (datetime.now() - timedelta(days=1)).replace(hour=0, minute=0, second=0)
 
@@ -154,7 +154,7 @@ class TestHeatmapsAnalytics(TestCase):
             sample_raw_data
         )
 
-        analytics = self.heatmaps.start(from_start=True)
+        analytics = await self.heatmaps.start(from_start=True)
 
         self.assertIsInstance(analytics, list)
 

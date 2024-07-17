@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime, timedelta
 
 from tc_analyzer_lib.metrics.heatmaps import Heatmaps
@@ -102,7 +103,7 @@ def test_mentioned_messages():
         resources=list(channelIds),
         analyzer_config=DiscordAnalyzerConfig(),
     )
-    results = analyzer_heatmaps.start(from_start=True)
+    results = asyncio.run(analyzer_heatmaps.start(from_start=True))
 
     assert len(results) == len(acc_names) * DAY_COUNT * len(channelIds)
     for document in results:

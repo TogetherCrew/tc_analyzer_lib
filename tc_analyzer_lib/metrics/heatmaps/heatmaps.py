@@ -33,13 +33,12 @@ class Heatmaps:
         """
         self.platform_id = platform_id
         self.resources = resources
-        self.client = MongoSingleton.get_instance().get_client()
         self.period = period
 
         self.analyzer_config = analyzer_config
         self.utils = HeatmapsUtils(platform_id)
 
-    def start(self, from_start: bool = False) -> list[dict]:
+    async def start(self, from_start: bool = False) -> list[dict]:
         """
         Based on the rawdata creates and stores the heatmap data
 
@@ -59,7 +58,7 @@ class Heatmaps:
         """
         log_prefix = f"PLATFORMID: {self.platform_id}:"
 
-        last_date = self.utils.get_last_date()
+        last_date = await self.utils.get_last_date()
 
         analytics_date: datetime
         if last_date is None or from_start:
@@ -70,8 +69,10 @@ class Heatmaps:
         # initialize the data array
         heatmaps_results = []
 
-        cursor = self.utils.get_users(is_bot=True)
-        bot_ids = list(map(lambda user: user["id"], cursor))
+        cursor = await self.utils.get_users(is_bot=True)
+        bot_ids: list[str] = []
+        async for bot in cursor:
+            bot_ids.append(bot["id"])
 
         # index = 0
         while analytics_date.date() < datetime.now().date():
@@ -81,7 +82,7 @@ class Heatmaps:
             end_day = start_day + timedelta(days=1)
 
             # getting the active resource_ids (activities being done there by users)
-            period_resources = self.utils.get_active_resources_period(
+            period_resources = await self.utils.get_active_resources_period(
                 start_day=start_day,
                 end_day=end_day,
                 resource_identifier=self.analyzer_config.resource_identifier,
@@ -98,7 +99,7 @@ class Heatmaps:
                 )
 
             for resource_idx, resource_id in enumerate(period_resources):
-                user_ids = self.utils.get_active_users(
+                user_ids = await self.utils.get_active_users(
                     start_day,
                     end_day,
                     metadata_filter={
@@ -133,13 +134,13 @@ class Heatmaps:
                         "date": datetime(doc_date.year, doc_date.month, doc_date.day),
                         "user": author_id,
                     }
-                    hourly_analytics = self._process_hourly_analytics(
+                    hourly_analytics = await self._process_hourly_analytics(
                         day=analytics_date,
                         resource=resource_id,
                         author_id=author_id,
                     )
 
-                    raw_analytics = self._process_raw_analytics(
+                    raw_analytics = await self._process_raw_analytics(
                         day=analytics_date,
                         resource=resource_id,
                         author_id=author_id,
@@ -155,7 +156,7 @@ class Heatmaps:
 
         return heatmaps_results
 
-    def _process_hourly_analytics(
+    async def _process_hourly_analytics(
         self,
         day: date,
         resource: str,
@@ -193,7 +194,7 @@ class Heatmaps:
                 else:
                     activity_name = "reaction"
 
-                analytics_vector = analytics_hourly.analyze(
+                analytics_vector = await analytics_hourly.analyze(
                     day=day,
                     activity=config.type.value,
                     activity_name=activity_name,
@@ -219,7 +220,7 @@ class Heatmaps:
 
                 activity_name = config.activity_name
 
-                analytics_vector = analytics_hourly.analyze(
+                analytics_vector = await analytics_hourly.analyze(
                     day=day,
                     activity=config.type.value,
                     activity_name=activity_name,
@@ -235,7 +236,7 @@ class Heatmaps:
 
         return analytics
 
-    def _process_raw_analytics(
+    async def _process_raw_analytics(
         self,
         day: date,
         resource: str,
@@ -272,7 +273,7 @@ class Heatmaps:
                     **config.rawmemberactivities_condition,
                 }
 
-            analytics_items = analytics_raw.analyze(
+            analytics_items = await analytics_raw.analyze(
                 day=day,
                 activity=config.type.value,
                 activity_name=activity_name,

@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from unittest import TestCase
+from unittest import IsolatedAsyncioTestCase
 
 from tc_analyzer_lib.algorithms.utils.member_activity_utils import assess_engagement
 from tc_analyzer_lib.metrics.heatmaps import Heatmaps
@@ -11,7 +11,7 @@ from .utils.analyzer_setup import launch_db_access
 from .utils.setup_platform import setup_platform
 
 
-class TestAssessEngagementReactions(TestCase):
+class TestAssessEngagementReactions(IsolatedAsyncioTestCase):
     def setUp(self) -> None:
         platform_id = "515151515151515151515151"
         self.db_access = launch_db_access(platform_id)
@@ -35,11 +35,11 @@ class TestAssessEngagementReactions(TestCase):
         base_analyzer.database_connect()
         self.db_connections = base_analyzer.DB_connections
 
-    def heatmaps_analytics(self):
+    async def heatmaps_analytics(self):
         """
         heatmaps are the input for assess_engagement's interaction matrix
         """
-        heatmaps_data = self.heatmaps.start(from_start=True)
+        heatmaps_data = await self.heatmaps.start(from_start=True)
 
         analytics_data = {}
         analytics_data["heatmaps"] = heatmaps_data
@@ -53,7 +53,7 @@ class TestAssessEngagementReactions(TestCase):
             remove_heatmaps=False,
         )
 
-    def test_single_user_reaction(self):
+    async def test_single_user_reaction(self):
         """
         just actions and no interaction
         """
@@ -138,7 +138,7 @@ class TestAssessEngagementReactions(TestCase):
         self.db_access.db_mongo_client[self.heatmaps.platform_id][
             "rawmemberactivities"
         ].insert_many(rawinfo_samples)
-        self.heatmaps_analytics()
+        await self.heatmaps_analytics()
 
         activity_dict: dict[str, dict] = {
             "all_joined": {"0": set()},

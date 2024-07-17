@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from datetime import date, datetime, timedelta
 
@@ -116,36 +117,57 @@ class Heatmaps:
                         " Skipping the day."
                     )
 
-                for _, author_id in enumerate(user_ids):
+                day_tasks = []
+                for author_id in user_ids:
                     # skipping doing analytics for bots
                     if author_id in bot_ids:
                         continue
 
                     doc_date = analytics_date.date()
-                    document = {
-                        self.analyzer_config.resource_identifier: resource_id,
-                        "date": datetime(doc_date.year, doc_date.month, doc_date.day),
-                        "user": author_id,
-                    }
-                    hourly_analytics = await self._process_hourly_analytics(
-                        day=analytics_date,
-                        resource=resource_id,
-                        author_id=author_id,
+                    task = asyncio.gather(
+                        self._prepare_heatmaps_document(
+                            doc_date, resource_id, author_id
+                        ),
+                        self._process_hourly_analytics(
+                            day=analytics_date,
+                            resource=resource_id,
+                            author_id=author_id,
+                        ),
+                        self._process_raw_analytics(
+                            day=analytics_date,
+                            resource=resource_id,
+                            author_id=author_id,
+                        ),
+                    )
+                    day_tasks.append(task)
+
+                results = await asyncio.gather(*day_tasks)
+                day_results = []
+                for document, hourly_analytics, raw_analytics in results:
+                    day_results.append(
+                        {**document, **hourly_analytics, **raw_analytics}
                     )
 
-                    raw_analytics = await self._process_raw_analytics(
-                        day=analytics_date,
-                        resource=resource_id,
-                        author_id=author_id,
-                    )
-                    document = {**document, **hourly_analytics, **raw_analytics}
-
-                    heatmaps_results.append(document)
+                heatmaps_results.extend(day_results)
 
             # analyze next day
             analytics_date += timedelta(days=1)
 
         return heatmaps_results
+
+    async def _prepare_heatmaps_document(
+        self, date: datetime, resource_id: str, author_id: str
+    ) -> dict[str, str | datetime]:
+        """
+        prepare the document for heatmaps analytics
+        the hourly analytics and raw analytics data would be added after it
+        """
+        document = {
+            self.analyzer_config.resource_identifier: resource_id,
+            "date": datetime(date.year, date.month, date.day),
+            "user": author_id,
+        }
+        return document
 
     async def _process_hourly_analytics(
         self,

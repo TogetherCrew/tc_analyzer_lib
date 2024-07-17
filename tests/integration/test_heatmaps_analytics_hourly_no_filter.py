@@ -1,18 +1,20 @@
 from datetime import datetime
-from unittest import TestCase
+from unittest import IsolatedAsyncioTestCase
 
 from tc_analyzer_lib.metrics.heatmaps.analytics_hourly import AnalyticsHourly
 from tc_analyzer_lib.utils.mongo import MongoSingleton
 
 
-class TestHeatmapsAnalyticsBaseNoFilter(TestCase):
+class TestHeatmapsAnalyticsBaseNoFilter(IsolatedAsyncioTestCase):
     def setUp(self) -> None:
         self.platform_id = "3456789"
         self.raw_data_model = AnalyticsHourly(self.platform_id)
-        self.mongo_client = MongoSingleton.get_instance().get_client()
+        self.mongo_client = MongoSingleton.get_instance(
+            skip_singleton=True
+        ).get_client()
         self.mongo_client[self.platform_id].drop_collection("rawmemberactivities")
 
-    def test_get_hourly_analytics_single_date(self):
+    async def test_get_hourly_analytics_single_date(self):
         sample_raw_data = [
             {
                 "author_id": 9000,
@@ -32,7 +34,7 @@ class TestHeatmapsAnalyticsBaseNoFilter(TestCase):
         self.mongo_client[self.platform_id]["rawmemberactivities"].insert_many(
             sample_raw_data
         )
-        hourly_analytics = self.raw_data_model.get_hourly_analytics(
+        hourly_analytics = await self.raw_data_model.get_hourly_analytics(
             day=datetime(2023, 1, 1).date(),
             activity="interactions",
             author_id=9000,
@@ -69,7 +71,7 @@ class TestHeatmapsAnalyticsBaseNoFilter(TestCase):
         self.assertEqual(len(hourly_analytics), 24)
         self.assertEqual(hourly_analytics, expected_analytics)
 
-    def test_get_hourly_analytics_multiple_date(self):
+    async def test_get_hourly_analytics_multiple_date(self):
         sample_raw_data = [
             {
                 "author_id": 9000,
@@ -103,7 +105,7 @@ class TestHeatmapsAnalyticsBaseNoFilter(TestCase):
         self.mongo_client[self.platform_id]["rawmemberactivities"].insert_many(
             sample_raw_data
         )
-        hourly_analytics = self.raw_data_model.get_hourly_analytics(
+        hourly_analytics = await self.raw_data_model.get_hourly_analytics(
             day=datetime(2023, 1, 1).date(),
             activity="interactions",
             author_id=9000,
@@ -139,7 +141,7 @@ class TestHeatmapsAnalyticsBaseNoFilter(TestCase):
         self.assertEqual(len(hourly_analytics), 24)
         self.assertEqual(hourly_analytics, expected_analytics)
 
-    def test_get_hourly_analytics_multiple_date_multiple_authors(self):
+    async def test_get_hourly_analytics_multiple_date_multiple_authors(self):
         sample_raw_data = [
             {
                 "author_id": 9000,
@@ -187,7 +189,7 @@ class TestHeatmapsAnalyticsBaseNoFilter(TestCase):
         self.mongo_client[self.platform_id]["rawmemberactivities"].insert_many(
             sample_raw_data
         )
-        hourly_analytics = self.raw_data_model.get_hourly_analytics(
+        hourly_analytics = await self.raw_data_model.get_hourly_analytics(
             day=datetime(2023, 1, 1).date(),
             activity="interactions",
             author_id=9000,
@@ -223,7 +225,7 @@ class TestHeatmapsAnalyticsBaseNoFilter(TestCase):
         self.assertEqual(len(hourly_analytics), 24)
         self.assertEqual(hourly_analytics, expected_analytics)
 
-    def test_get_hourly_analytics_multiple_date_multiple_data(self):
+    async def test_get_hourly_analytics_multiple_date_multiple_data(self):
         sample_raw_data = [
             {
                 "author_id": 9001,
@@ -271,7 +273,7 @@ class TestHeatmapsAnalyticsBaseNoFilter(TestCase):
         self.mongo_client[self.platform_id]["rawmemberactivities"].insert_many(
             sample_raw_data
         )
-        hourly_analytics = self.raw_data_model.get_hourly_analytics(
+        hourly_analytics = await self.raw_data_model.get_hourly_analytics(
             day=datetime(2023, 1, 2).date(),
             activity="interactions",
             author_id=9001,

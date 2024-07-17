@@ -1,17 +1,16 @@
-import asyncio
 from datetime import datetime, timedelta
-from unittest import TestCase
+from unittest import IsolatedAsyncioTestCase
 
 from .utils.analyzer_setup import launch_db_access
 from .utils.setup_platform import setup_platform
 
 
-class TestMemberActivitiesActionsAllActivities(TestCase):
+class TestMemberActivitiesActionsAllActivities(IsolatedAsyncioTestCase):
     def setUp(self) -> None:
         self.platformId = "1234"
         self.db_access = launch_db_access(self.platformId)
 
-    def test_single_user_action(self):
+    async def test_single_user_action(self):
         """
         just actions and no interaction
         """
@@ -64,7 +63,7 @@ class TestMemberActivitiesActionsAllActivities(TestCase):
             rawinfo_samples
         )
 
-        asyncio.run(analyzer.recompute())
+        await analyzer.recompute()
         cursor = self.db_access.db_mongo_client[platform_id]["memberactivities"].find(
             {},
             {

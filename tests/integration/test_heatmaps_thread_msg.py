@@ -8,7 +8,7 @@ from tc_analyzer_lib.utils.mongo import MongoSingleton
 
 def test_thread_messages():
     platform_id = "1122334455"
-    mongo_client = MongoSingleton.get_instance().get_client()
+    mongo_client = MongoSingleton.get_instance(skip_singleton=True).get_client()
     database = mongo_client[platform_id]
 
     database.drop_collection("rawmemberactivities")

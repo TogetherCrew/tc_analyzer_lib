@@ -12,7 +12,7 @@ def test_analyzer_from_start_one_interval():
     # first create the collections
     platform_id = "515151515151515151515151"
     guildId = "1234"
-    db_access = launch_db_access(platform_id)
+    db_access = launch_db_access(platform_id, skip_singleton=True)
 
     analyzer = setup_platform(db_access, platform_id, discordId_list=["user_0"])
 

@@ -1,19 +1,21 @@
 from datetime import datetime, timedelta
-from unittest import TestCase
+from unittest import IsolatedAsyncioTestCase
 
 from tc_analyzer_lib.metrics.heatmaps.analytics_raw import AnalyticsRaw
 from tc_analyzer_lib.schemas import ActivityDirection, RawAnalyticsItem
 from tc_analyzer_lib.utils.mongo import MongoSingleton
 
 
-class TestHeatmapsRawAnalytics(TestCase):
+class TestHeatmapsRawAnalytics(IsolatedAsyncioTestCase):
     def setUp(self) -> None:
         self.platform_id = "3456789"
         self.analytics_raw = AnalyticsRaw(self.platform_id)
-        self.mongo_client = MongoSingleton.get_instance().get_client()
+        self.mongo_client = MongoSingleton.get_instance(
+            skip_singleton=True
+        ).get_client()
         self.mongo_client[self.platform_id].drop_collection("rawmemberactivities")
 
-    def test_raw_analytics_single_user(self):
+    async def test_raw_analytics_single_user(self):
         day = datetime(2023, 1, 1).date()
         sample_raw_data = [
             {
@@ -37,7 +39,7 @@ class TestHeatmapsRawAnalytics(TestCase):
             sample_raw_data
         )
 
-        analytics_result = self.analytics_raw.analyze(
+        analytics_result = await self.analytics_raw.analyze(
             day=day,
             activity="interactions",
             activity_name="reply",
@@ -51,7 +53,7 @@ class TestHeatmapsRawAnalytics(TestCase):
         self.assertEqual(analytics_result[0].account, 9003)
         self.assertEqual(analytics_result[0].count, 1)
 
-    def test_raw_analytics_wrong_user(self):
+    async def test_raw_analytics_wrong_user(self):
         """
         asking for another user's analytics
         results should be empty
@@ -79,7 +81,7 @@ class TestHeatmapsRawAnalytics(TestCase):
             sample_raw_data
         )
 
-        analytics_result = self.analytics_raw.analyze(
+        analytics_result = await self.analytics_raw.analyze(
             day=day,
             activity="interactions",
             activity_name="reply",
@@ -89,7 +91,7 @@ class TestHeatmapsRawAnalytics(TestCase):
 
         self.assertEqual(analytics_result, [])
 
-    def test_raw_analytics_wrong_activity_direction(self):
+    async def test_raw_analytics_wrong_activity_direction(self):
         """
         asking for another activity direction analytics
         results should be empty
@@ -117,7 +119,7 @@ class TestHeatmapsRawAnalytics(TestCase):
             sample_raw_data
         )
 
-        analytics_result = self.analytics_raw.analyze(
+        analytics_result = await self.analytics_raw.analyze(
             day=day,
             activity="interactions",
             activity_name="reply",
@@ -127,7 +129,7 @@ class TestHeatmapsRawAnalytics(TestCase):
 
         self.assertEqual(analytics_result, [])
 
-    def test_raw_analytics_wrong_day(self):
+    async def test_raw_analytics_wrong_day(self):
         """
         asking for another day analytics
         results should be empty
@@ -155,7 +157,7 @@ class TestHeatmapsRawAnalytics(TestCase):
             sample_raw_data
         )
 
-        analytics_result = self.analytics_raw.analyze(
+        analytics_result = await self.analytics_raw.analyze(
             day=day + timedelta(days=1),
             activity="interactions",
             activity_name="reply",
@@ -164,7 +166,7 @@ class TestHeatmapsRawAnalytics(TestCase):
         )
         self.assertEqual(analytics_result, [])
 
-    def test_raw_analytics_wrong_activity(self):
+    async def test_raw_analytics_wrong_activity(self):
         """
         asking for another activity analytics
         results should be empty
@@ -192,7 +194,7 @@ class TestHeatmapsRawAnalytics(TestCase):
             sample_raw_data
         )
 
-        analytics_result = self.analytics_raw.analyze(
+        analytics_result = await self.analytics_raw.analyze(
             day=day,
             activity="interactions",
             activity_name="mention",
@@ -202,7 +204,7 @@ class TestHeatmapsRawAnalytics(TestCase):
 
         self.assertEqual(analytics_result, [])
 
-    def test_raw_analytics_multiple_users(self):
+    async def test_raw_analytics_multiple_users(self):
         """
         asking for another activity analytics
         results should be empty
@@ -260,7 +262,7 @@ class TestHeatmapsRawAnalytics(TestCase):
             sample_raw_data
         )
 
-        analytics_result = self.analytics_raw.analyze(
+        analytics_result = await self.analytics_raw.analyze(
             day=day,
             activity="interactions",
             activity_name="reply",

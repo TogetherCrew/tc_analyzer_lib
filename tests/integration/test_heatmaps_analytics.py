@@ -23,7 +23,9 @@ class TestHeatmapsAnalytics(IsolatedAsyncioTestCase):
             resources=resources,
             analyzer_config=discord_analyzer_config,
         )
-        self.mongo_client = MongoSingleton.get_instance().get_client()
+        self.mongo_client = MongoSingleton.get_instance(
+            skip_singleton=True
+        ).get_client()
         self.mongo_client[platform_id].drop_collection("rawmemberactivities")
         self.mongo_client[platform_id].drop_collection("rawmembers")
 

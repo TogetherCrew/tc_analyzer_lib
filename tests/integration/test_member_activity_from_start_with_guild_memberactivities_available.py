@@ -14,7 +14,7 @@ def test_analyzer_member_activities_from_start_available_member_activity():
     # first create the collections
     guildId = "1234"
     platform_id = "515151515151515151515151"
-    db_access = launch_db_access(platform_id)
+    db_access = launch_db_access(platform_id, skip_singleton=True)
 
     analyzer = setup_platform(db_access, platform_id, discordId_list=["user_0"])
 

@@ -1,4 +1,4 @@
-# test analyzing memberactivities
+import asyncio
 from datetime import datetime, timedelta
 
 import numpy as np
@@ -99,7 +99,7 @@ def test_analyzer_40days_period_run_once_available_analytics_overlapping_period(
         rawinfo_samples
     )
 
-    analyzer.run_once()
+    asyncio.run(analyzer.run_once())
 
     memberactivities_cursor = db_access.query_db_find(
         "memberactivities", {}, sorting=("date", -1)

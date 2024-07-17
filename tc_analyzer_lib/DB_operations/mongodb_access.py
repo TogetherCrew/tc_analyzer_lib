@@ -2,7 +2,7 @@ from tc_analyzer_lib.utils.mongo import MongoSingleton
 
 
 class DB_access:
-    def __init__(self, db_name) -> None:
+    def __init__(self, db_name: str, skip_singleton: bool = False) -> None:
         """
         set-up the MongoDB database access
 
@@ -22,7 +22,7 @@ class DB_access:
            the connection string used to connect to MongoDB
         """
 
-        client = MongoSingleton.get_instance().get_client()
+        client = MongoSingleton.get_instance(skip_singleton).get_client()
         self.db_name = db_name
         #   if db_name is None:
         #       self.db_client = None

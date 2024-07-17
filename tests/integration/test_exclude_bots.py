@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime, timedelta
 
 import numpy as np
@@ -98,7 +99,7 @@ def test_excluding_bots_heatmaps():
         rawinfo_samples
     )
 
-    analyzer.run_once()
+    asyncio.run(analyzer.run_once())
 
     db_access.db_mongo_client[platform_id]
 

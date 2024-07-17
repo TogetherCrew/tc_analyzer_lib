@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime, timedelta, timezone
 
 import numpy as np
@@ -112,7 +113,7 @@ def test_networkgraph_six_months_period_run_once_available_analytics():
         rawinfo_samples
     )
 
-    analyzer.run_once()
+    asyncio.run(analyzer.run_once())
 
     graph_schema = analyzer.graph_schema
     platform_label = graph_schema.platform_label

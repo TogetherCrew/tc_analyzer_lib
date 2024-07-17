@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime, timedelta, timezone
 
 import numpy as np
@@ -111,7 +112,7 @@ def test_networkgraph_35_days_period_recompute_available_analytics():
         rawinfo_samples
     )
 
-    analyzer.recompute()
+    asyncio.run(analyzer.recompute())
 
     graph_schema = analyzer.graph_schema
     platform_label = graph_schema.platform_label

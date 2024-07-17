@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime, timedelta
 from unittest import TestCase
 
@@ -63,7 +64,7 @@ class TestMemberActivitiesActionsAllActivities(TestCase):
             rawinfo_samples
         )
 
-        analyzer.recompute()
+        asyncio.run(analyzer.recompute())
         cursor = self.db_access.db_mongo_client[platform_id]["memberactivities"].find(
             {},
             {

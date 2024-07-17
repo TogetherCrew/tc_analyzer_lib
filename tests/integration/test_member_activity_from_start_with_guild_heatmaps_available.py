@@ -1,4 +1,4 @@
-# test analyzing memberactivities
+import asyncio
 from datetime import datetime, timedelta
 
 from .utils.analyzer_setup import launch_db_access
@@ -56,7 +56,7 @@ def test_analyzer_member_activities_from_start_available_heatmaps():
         rawinfo_samples
     )
 
-    analyzer.recompute()
+    asyncio.run(analyzer.recompute())
 
     memberactivities_data = db_access.db_mongo_client[platform_id][
         "memberactivities"

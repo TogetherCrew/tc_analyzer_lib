@@ -1,4 +1,4 @@
-# test analyzing memberactivities
+import asyncio
 from datetime import datetime, timedelta
 
 import numpy as np
@@ -77,7 +77,7 @@ def test_analyzer_three_month_period_recompute_empty_analytics():
         rawinfo_samples
     )
 
-    analyzer.recompute()
+    asyncio.run(analyzer.recompute())
 
     memberactivities_cursor = db_access.query_db_find(
         "memberactivities", {}, sorting=("date", -1)

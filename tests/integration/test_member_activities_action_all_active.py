@@ -1,16 +1,16 @@
 from datetime import datetime, timedelta
-from unittest import TestCase
+from unittest import IsolatedAsyncioTestCase
 
 from .utils.analyzer_setup import launch_db_access
 from .utils.setup_platform import setup_platform
 
 
-class TestMemberActivitiesActionsAllActive(TestCase):
+class TestMemberActivitiesActionsAllActive(IsolatedAsyncioTestCase):
     def setUp(self) -> None:
         self.platform_id = "60d5ec44f9a3c2b6d7e2d11a"
-        self.db_access = launch_db_access(self.platform_id)
+        self.db_access = launch_db_access(self.platform_id, True)
 
-    def test_single_user_action(self):
+    async def test_single_user_action(self):
         self.db_access.db_mongo_client[self.platform_id].drop_collection("heatmaps")
         users_id_list = ["user1"]
         analyzer = analyzer = setup_platform(
@@ -41,7 +41,7 @@ class TestMemberActivitiesActionsAllActive(TestCase):
             "rawmemberactivities"
         ].insert_many(rawinfo_samples)
 
-        analyzer.recompute()
+        await analyzer.recompute()
         cursor = self.db_access.db_mongo_client[self.platform_id][
             "memberactivities"
         ].find({}, {"_id": 0, "all_active": 1})
@@ -52,7 +52,7 @@ class TestMemberActivitiesActionsAllActive(TestCase):
         for document in computed_analytics:
             self.assertEqual(set(document["all_active"]), set(["user1"]))
 
-    def test_lone_msg_action(self):
+    async def test_lone_msg_action(self):
         users_id_list = ["user1", "user2", "user3"]
 
         analyzer = setup_platform(
@@ -85,7 +85,7 @@ class TestMemberActivitiesActionsAllActive(TestCase):
             "rawmemberactivities"
         ].insert_many(rawinfo_samples)
 
-        analyzer.recompute()
+        await analyzer.recompute()
         cursor = self.db_access.db_mongo_client[self.platform_id][
             "memberactivities"
         ].find({}, {"_id": 0, "all_active": 1})
@@ -96,7 +96,7 @@ class TestMemberActivitiesActionsAllActive(TestCase):
         for document in computed_analytics:
             self.assertEqual(set(document["all_active"]), set(["user1", "user2"]))
 
-    def test_thr_message_action(self):
+    async def test_thr_message_action(self):
         users_id_list = ["user1", "user2", "user3", "user4"]
         analyzer = setup_platform(
             self.db_access,
@@ -128,7 +128,7 @@ class TestMemberActivitiesActionsAllActive(TestCase):
             "rawmemberactivities"
         ].insert_many(rawinfo_samples)
 
-        analyzer.recompute()
+        await analyzer.recompute()
         cursor = self.db_access.db_mongo_client[self.platform_id][
             "memberactivities"
         ].find({}, {"_id": 0, "all_active": 1, "date": 1})

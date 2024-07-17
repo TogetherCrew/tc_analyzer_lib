@@ -1,4 +1,4 @@
-# test analyzing memberactivities
+import asyncio
 from datetime import datetime, timedelta
 
 from bson.objectid import ObjectId
@@ -64,7 +64,7 @@ def test_analyzer_member_activities_from_start_empty_memberactivities():
         rawinfo_samples
     )
 
-    analyzer.recompute()
+    asyncio.run(analyzer.recompute())
 
     memberactivities_data = db_access.db_mongo_client[platform_id][
         "memberactivities"

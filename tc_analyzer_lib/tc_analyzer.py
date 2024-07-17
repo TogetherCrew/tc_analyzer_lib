@@ -65,14 +65,14 @@ class TCAnalyzer(AnalyzerDBManager):
         # connect to Neo4j & MongoDB database
         self.database_connect()
 
-    def analyze(self, recompute: bool) -> None:
+    async def analyze(self, recompute: bool) -> None:
         # TODO: merge run_one and recompute codes
         if recompute:
-            self.run_once()
+            await self.run_once()
         else:
-            self.recompute()
+            await self.recompute()
 
-    def run_once(self):
+    async def run_once(self):
         """Run analysis and append to previous anlaytics"""
         # check if the platform was available
         # if not, will raise an error
@@ -86,7 +86,7 @@ class TCAnalyzer(AnalyzerDBManager):
             resources=self.resources,
             analyzer_config=self.analyzer_config,
         )
-        heatmaps_data = asyncio.run(heatmaps_analysis.start(from_start=False))
+        heatmaps_data = await heatmaps_analysis.start(from_start=False)
 
         # storing heatmaps since memberactivities use them
         analytics_data = {}
@@ -134,7 +134,7 @@ class TCAnalyzer(AnalyzerDBManager):
 
         self.platform_utils.update_isin_progress()
 
-    def recompute(self):
+    async def recompute(self):
         """
         recompute the analytics (heatmaps + memberactivities + graph analytics)
         for a new selection of channels
@@ -150,7 +150,7 @@ class TCAnalyzer(AnalyzerDBManager):
             resources=self.resources,
             analyzer_config=self.analyzer_config,
         )
-        heatmaps_data = asyncio.run(heatmaps_analysis.start(from_start=True))
+        heatmaps_data = await heatmaps_analysis.start(from_start=True)
 
         # storing heatmaps since memberactivities use them
         analytics_data = {}

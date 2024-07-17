@@ -1,4 +1,4 @@
-# test analyzing memberactivities
+import asyncio
 from datetime import datetime, timedelta
 
 import numpy as np
@@ -76,7 +76,7 @@ def test_analyzer_week_period_recompute_empty_analytics():
         rawinfo_samples
     )
 
-    analyzer.recompute()
+    asyncio.run(analyzer.recompute())
 
     memberactivities_cursor = db_access.db_mongo_client[platform_id][
         "memberactivities"

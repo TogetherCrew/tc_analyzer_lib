@@ -1,4 +1,4 @@
-# test analyzing memberactivities
+import asyncio
 from datetime import datetime, timedelta
 
 import numpy as np
@@ -83,7 +83,7 @@ def test_all_joined_day_members():
         rawinfo_samples
     )
 
-    analyzer.run_once()
+    asyncio.run(analyzer.run_once())
 
     cursor = db_access.db_mongo_client[platform_id]["memberactivities"].find([])
 

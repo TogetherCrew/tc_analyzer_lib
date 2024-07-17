@@ -150,7 +150,7 @@ class TCAnalyzer(AnalyzerDBManager):
             resources=self.resources,
             analyzer_config=self.analyzer_config,
         )
-        heatmaps_data = heatmaps_analysis.start(from_start=True)
+        heatmaps_data = asyncio.run(heatmaps_analysis.start(from_start=True))
 
         # storing heatmaps since memberactivities use them
         analytics_data = {}

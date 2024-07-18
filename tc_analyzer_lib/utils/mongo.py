@@ -1,8 +1,8 @@
 import logging
 from typing import Any
 
-from pymongo import MongoClient
 from motor.motor_asyncio import AsyncIOMotorClient
+from pymongo import MongoClient
 from tc_analyzer_lib.utils.credentials import get_mongo_credentials
 
 

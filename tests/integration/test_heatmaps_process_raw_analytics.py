@@ -1,5 +1,5 @@
-from typing import Any, Coroutine
 from datetime import datetime
+from typing import Any, Coroutine
 from unittest import IsolatedAsyncioTestCase
 
 from tc_analyzer_lib.metrics.heatmaps import Heatmaps

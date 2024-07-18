@@ -121,6 +121,11 @@ class AnalyticsRaw:
                     "date": {"$gte": start_day, "$lt": end_day},
                     "author_id": author_id,
                     **kwargs.get("filters", {}),
+                }
+            },
+            {"$unwind": f"${activity}"},
+            {
+                "$match": {
                     f"{activity}.name": activity_name,
                     f"{activity}.type": activity_direction,
                 }
@@ -131,6 +136,7 @@ class AnalyticsRaw:
         ]
 
         results = await self.get_aggregate_results(pipeline)
+        print("results", results)
         return self._prepare_raw_analytics_item(author_id, results)
 
     async def get_aggregate_results(self, pipeline):

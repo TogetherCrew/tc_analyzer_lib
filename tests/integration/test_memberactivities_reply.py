@@ -1,16 +1,16 @@
 from datetime import datetime, timedelta
-from unittest import TestCase
+from unittest import IsolatedAsyncioTestCase
 
 from .utils.analyzer_setup import launch_db_access
 from .utils.setup_platform import setup_platform
 
 
-class TestMemberActivitiesReply(TestCase):
+class TestMemberActivitiesReply(IsolatedAsyncioTestCase):
     def setUp(self) -> None:
         self.platform_id = "515151515151515151515151"
-        self.db_access = launch_db_access(self.platform_id)
+        self.db_access = launch_db_access(self.platform_id, skip_singleton=True)
 
-    def test_single_user_interaction(self):
+    async def test_single_user_interaction(self):
         users_id_list = ["user1", "user2"]
 
         action = {
@@ -88,7 +88,7 @@ class TestMemberActivitiesReply(TestCase):
         self.db_access.db_mongo_client[self.platform_id][
             "rawmemberactivities"
         ].insert_many(rawinfo_samples)
-        analyzer.recompute()
+        await analyzer.recompute()
         cursor = self.db_access.db_mongo_client[self.platform_id][
             "memberactivities"
         ].find(

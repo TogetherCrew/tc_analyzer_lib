@@ -12,7 +12,7 @@ def test_get_past_7_days_heatmap_users_available_users():
     """
     # first create the collections
     platform_id = "515151515151515151515151"
-    db_access = launch_db_access(platform_id)
+    db_access = launch_db_access(platform_id, skip_singleton=True)
 
     start_date = datetime(2023, 1, 1)
 
@@ -64,7 +64,7 @@ def test_get_all_days_heatmap_users_available_users():
     """
     # first create the collections
     platform_id = "515151515151515151515151"
-    db_access = launch_db_access(platform_id)
+    db_access = launch_db_access(platform_id, skip_singleton=True)
 
     start_date = datetime(2023, 1, 1)
 
@@ -114,7 +114,7 @@ def test_get_just_7_days_heatmap_users_available_users():
     """
     # first create the collections
     platform_id = "515151515151515151515151"
-    db_access = launch_db_access(platform_id)
+    db_access = launch_db_access(platform_id, skip_singleton=True)
 
     start_date = datetime(2023, 1, 1)
 
@@ -176,7 +176,7 @@ def test_get_past_7_days_heatmap_users_no_users():
     """
     # first create the collections
     platform_id = "515151515151515151515151"
-    db_access = launch_db_access(platform_id)
+    db_access = launch_db_access(platform_id, skip_singleton=True)
 
     start_date = datetime(2023, 1, 1)
 

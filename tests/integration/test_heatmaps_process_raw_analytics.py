@@ -1,12 +1,22 @@
 from datetime import datetime
-from unittest import TestCase
+from typing import Any, Coroutine
+from unittest import IsolatedAsyncioTestCase
 
 from tc_analyzer_lib.metrics.heatmaps import Heatmaps
 from tc_analyzer_lib.schemas.platform_configs import DiscordAnalyzerConfig
 from tc_analyzer_lib.utils.mongo import MongoSingleton
 
 
-class TestHeatmapsProcessRawAnalyticsSingleDay(TestCase):
+class TestHeatmapsProcessRawAnalyticsSingleDay(IsolatedAsyncioTestCase):
+    async def asyncSetUp(self) -> Coroutine[Any, Any, None]:
+        self.mongo_client = MongoSingleton.get_instance(
+            skip_singleton=True
+        ).get_async_client()
+        await self.mongo_client[self.platform_id].drop_collection("rawmemberactivities")
+
+    async def asyncTearDown(self) -> Coroutine[Any, Any, None]:
+        await self.mongo_client.drop_database(self.platform_id)
+
     def setUp(self) -> None:
         self.platform_id = "1234567890"
         period = datetime(2024, 1, 1)
@@ -21,16 +31,11 @@ class TestHeatmapsProcessRawAnalyticsSingleDay(TestCase):
             resources=resources,
             analyzer_config=discord_analyzer_config,
         )
-        self.mongo_client = MongoSingleton.get_instance().get_client()
-        self.mongo_client[self.platform_id].drop_collection("rawmemberactivities")
 
-    def tearDown(self) -> None:
-        self.mongo_client.drop_database(self.platform_id)
-
-    def test_empty_data(self):
+    async def test_empty_data(self):
         day = datetime(2023, 1, 1)
 
-        analytics = self.heatmaps._process_raw_analytics(
+        analytics = await self.heatmaps._process_raw_analytics(
             day=day,
             resource="124",
             author_id=9000,
@@ -48,7 +53,7 @@ class TestHeatmapsProcessRawAnalyticsSingleDay(TestCase):
         self.assertIsInstance(analytics["reacted_per_acc"], list)
         self.assertEqual(len(analytics["reacted_per_acc"]), 0)
 
-    def test_single_author(self):
+    async def test_single_author(self):
         platform_id = self.heatmaps.platform_id
         day = datetime(2023, 1, 1)
 
@@ -130,11 +135,11 @@ class TestHeatmapsProcessRawAnalyticsSingleDay(TestCase):
                 ],
             },
         ]
-        self.mongo_client[platform_id]["rawmemberactivities"].insert_many(
+        await self.mongo_client[platform_id]["rawmemberactivities"].insert_many(
             sample_raw_data
         )
 
-        analytics = self.heatmaps._process_raw_analytics(
+        analytics = await self.heatmaps._process_raw_analytics(
             day=day,
             resource="124",
             author_id=9001,
@@ -156,7 +161,7 @@ class TestHeatmapsProcessRawAnalyticsSingleDay(TestCase):
 
         self.assertEqual(analytics["reacted_per_acc"], [])
 
-    def test_multiple_authors(self):
+    async def test_multiple_authors(self):
         platform_id = self.heatmaps.platform_id
         day = datetime(2023, 1, 1)
 
@@ -246,11 +251,11 @@ class TestHeatmapsProcessRawAnalyticsSingleDay(TestCase):
                 ],
             },
         ]
-        self.mongo_client[platform_id]["rawmemberactivities"].insert_many(
+        await self.mongo_client[platform_id]["rawmemberactivities"].insert_many(
             sample_raw_data
         )
 
-        analytics = self.heatmaps._process_raw_analytics(
+        analytics = await self.heatmaps._process_raw_analytics(
             day=day,
             resource="124",
             author_id=9001,

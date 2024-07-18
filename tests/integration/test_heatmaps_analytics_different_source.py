@@ -1,12 +1,12 @@
 from datetime import datetime, timedelta
-from unittest import TestCase
+from unittest import IsolatedAsyncioTestCase
 
 from tc_analyzer_lib.metrics.heatmaps import Heatmaps
 from tc_analyzer_lib.schemas.platform_configs import DiscordAnalyzerConfig
 from tc_analyzer_lib.utils.mongo import MongoSingleton
 
 
-class TestHeatmapsAnalyticsSingleDay(TestCase):
+class TestHeatmapsAnalyticsSingleDay(IsolatedAsyncioTestCase):
     def setUp(self) -> None:
         platform_id = "1234567890"
         period = (datetime.now() - timedelta(days=1)).replace(
@@ -23,11 +23,13 @@ class TestHeatmapsAnalyticsSingleDay(TestCase):
             resources=resources,
             analyzer_config=discord_analyzer_config,
         )
-        self.mongo_client = MongoSingleton.get_instance().get_client()
+        self.mongo_client = MongoSingleton.get_instance(
+            skip_singleton=True
+        ).get_client()
         self.mongo_client[platform_id].drop_collection("rawmemberactivities")
         self.mongo_client[platform_id].drop_collection("rawmembers")
 
-    def test_heatmaps_single_day_from_start(self):
+    async def test_heatmaps_single_day_from_start(self):
         platform_id = self.heatmaps.platform_id
         day = (datetime.now() - timedelta(days=1)).replace(hour=0, minute=0, second=0)
 
@@ -148,14 +150,14 @@ class TestHeatmapsAnalyticsSingleDay(TestCase):
             sample_raw_data
         )
 
-        analytics = self.heatmaps.start(from_start=True)
+        analytics = await self.heatmaps.start(from_start=True)
 
         self.assertIsInstance(analytics, list)
 
         # resources doesn't match the raw data resources
         self.assertEqual(len(analytics), 0)
 
-    def test_heatmaps_analytics_pre_filled(self):
+    async def test_heatmaps_analytics_pre_filled(self):
         platform_id = self.heatmaps.platform_id
         day = (datetime.now() - timedelta(days=1)).replace(hour=0, minute=0, second=0)
 
@@ -179,7 +181,7 @@ class TestHeatmapsAnalyticsSingleDay(TestCase):
             }
         )
 
-        analytics = self.heatmaps.start(from_start=False)
+        analytics = await self.heatmaps.start(from_start=False)
         # the day was pre-filled before
         # and the period was exactly yesterday
         self.assertEqual(analytics, [])

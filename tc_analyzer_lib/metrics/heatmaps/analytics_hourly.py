@@ -6,13 +6,13 @@ from tc_analyzer_lib.utils.mongo import MongoSingleton
 
 
 class AnalyticsHourly:
-    def __init__(self, platform_id: str) -> None:
-        client = MongoSingleton.get_instance().get_client()
+    def __init__(self, platform_id: str, testing: bool = False) -> None:
+        client = MongoSingleton.get_instance(skip_singleton=testing).get_async_client()
         # `rawmemberactivities` is the collection we would use for analytics
         self.collection = client[platform_id]["rawmemberactivities"]
         self.msg_prefix = f"PLATFORMID: {platform_id}:"
 
-    def analyze(
+    async def analyze(
         self,
         day: date,
         activity: str,
@@ -56,7 +56,7 @@ class AnalyticsHourly:
                 "should be either `interactions` or `actions`"
             )
 
-        activity_vector = self.get_hourly_analytics(
+        activity_vector = await self.get_hourly_analytics(
             day=day,
             activity=activity,
             author_id=author_id,
@@ -69,7 +69,7 @@ class AnalyticsHourly:
 
         return activity_vector
 
-    def get_hourly_analytics(
+    async def get_hourly_analytics(
         self,
         day: date,
         activity: str,
@@ -103,28 +103,20 @@ class AnalyticsHourly:
         start_day = datetime.combine(day, time(0, 0, 0))
         end_day = start_day + timedelta(days=1)
 
-        # if no filter for resources then
-        if resource_filters is None:
-            resource_filters = {}
-
         pipeline = [
-            # the day for analytics
             {
                 "$match": {
                     "date": {"$gte": start_day, "$lt": end_day},
                     "author_id": author_id,
-                    **resource_filters,
+                    **(resource_filters or {}),
                 }
             },
-            # Unwind the activity array
             {"$unwind": f"${activity}"},
         ]
-        if filters is not None:
-            pipeline.append(
-                {"$match": filters},
-            )
 
-        # we need to count each enaged user as an interaction
+        if filters:
+            pipeline.append({"$match": filters})
+
         if activity == "interactions":
             pipeline.extend(
                 [
@@ -142,21 +134,20 @@ class AnalyticsHourly:
 
         pipeline.extend(
             [
-                # Add a field for the hour of the day from the date field
                 {"$addFields": {"hour": {"$hour": "$date"}}},
-                # Group by the hour and count the number of mentions
                 {"$group": {"_id": "$hour", "count": {"$sum": 1}}},
-                # Project the results into the desired format
-                {"$sort": {"_id": 1}},  # sorted by hour
+                {"$sort": {"_id": 1}},
             ]
         )
 
-        # Execute the aggregation pipeline
-        cursor = self.collection.aggregate(pipeline)
-        results = list(cursor)
+        results = await self.get_aggregate_results(pipeline)
+        return self._process_vectors(results)
 
-        hourly_analytics = self._process_vectors(results)
-        return hourly_analytics
+    async def get_aggregate_results(self, pipeline):
+        results = []
+        async for doc in self.collection.aggregate(pipeline):
+            results.append(doc)
+        return results
 
     def _process_vectors(
         self, analytics_mongo_results: list[dict[str, int]]
@@ -178,12 +169,7 @@ class AnalyticsHourly:
             a vector with length of 24
             each index representing the count of actions/interactions for that day
         """
-        hourly_analytics = np.zeros(24)
-
+        hourly_analytics = [0] * 24
         for analytics in analytics_mongo_results:
-            hour = analytics["_id"]
-            activity_count = analytics["count"]
-
-            hourly_analytics[hour] = activity_count
-
-        return list(hourly_analytics)
+            hourly_analytics[analytics["_id"]] = analytics["count"]
+        return hourly_analytics

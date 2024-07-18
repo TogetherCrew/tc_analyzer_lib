@@ -1,24 +1,28 @@
 from datetime import datetime
-from unittest import TestCase
+from unittest import IsolatedAsyncioTestCase
 
 from tc_analyzer_lib.metrics.heatmaps.heatmaps_utils import HeatmapsUtils
 from tc_analyzer_lib.utils.mongo import MongoSingleton
 
 
-class TestHeatmapsUtilsActiveUsers(TestCase):
+class TestHeatmapsUtilsActiveUsers(IsolatedAsyncioTestCase):
     def setUp(self) -> None:
-        client = MongoSingleton.get_instance().get_client()
+        client = MongoSingleton.get_instance(skip_singleton=True).get_client()
         self.platform_id = "1234567890"
         self.database = client[self.platform_id]
         self.database.drop_collection("rawmemberactivities")
 
         self.utils = HeatmapsUtils(self.platform_id)
 
-    def test_get_users_empty_collection(self):
-        users = self.utils.get_users()
-        self.assertEqual(list(users), [])
+    async def test_get_users_empty_collection(self):
+        cursor = await self.utils.get_users()
+        users = []
+        async for user in cursor:
+            users.append(user)
 
-    def test_get_multiple_users(self):
+        self.assertEqual(users, [])
+
+    async def test_get_multiple_users(self):
         start_day = datetime(2024, 1, 1)
         end_day = datetime(2024, 1, 2)
         samples = [
@@ -75,6 +79,6 @@ class TestHeatmapsUtilsActiveUsers(TestCase):
         ]
         self.database["rawmemberactivities"].insert_many(samples)
 
-        users = self.utils.get_active_users(start_day, end_day)
+        users = await self.utils.get_active_users(start_day, end_day)
 
         self.assertEqual(set(users), set(["user1", "user2", "user4", "user5"]))

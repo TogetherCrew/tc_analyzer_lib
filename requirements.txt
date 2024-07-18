@@ -21,3 +21,4 @@ redis
 tc-neo4j-lib==2.0.1
 pybars3
 backoff==2.2.1
+motor==3.5.1

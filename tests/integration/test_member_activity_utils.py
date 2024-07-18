@@ -9,7 +9,7 @@ from .utils.setup_platform import setup_platform
 def test_utils_get_members():
     platform_id = "515151515151515151515151"
     users = ["user_0"]
-    db_access = launch_db_access(platform_id)
+    db_access = launch_db_access(platform_id, skip_singleton=True)
     _ = setup_platform(db_access, platform_id, discordId_list=users, days_ago_period=7)
 
     rawinfo_samples = []

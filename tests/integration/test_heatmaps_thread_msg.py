@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime, timedelta
 
 from tc_analyzer_lib.metrics.heatmaps import Heatmaps
@@ -7,7 +8,7 @@ from tc_analyzer_lib.utils.mongo import MongoSingleton
 
 def test_thread_messages():
     platform_id = "1122334455"
-    mongo_client = MongoSingleton.get_instance().get_client()
+    mongo_client = MongoSingleton.get_instance(skip_singleton=True).get_client()
     database = mongo_client[platform_id]
 
     database.drop_collection("rawmemberactivities")
@@ -70,7 +71,7 @@ def test_thread_messages():
         resources=list(channelIds),
         analyzer_config=DiscordAnalyzerConfig(),
     )
-    results = analyzer_heatmaps.start(from_start=True)
+    results = asyncio.run(analyzer_heatmaps.start(from_start=True))
 
     assert len(results) == len(acc_names) * DAY_COUNT
     for document in results:

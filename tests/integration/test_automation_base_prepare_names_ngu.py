@@ -11,7 +11,7 @@ def test_prepare_ngu_no_data():
     the output should be an empty list
     """
     platform_id = "515151515151515151515151"
-    db_access = launch_db_access(platform_id)
+    db_access = launch_db_access(platform_id, skip_singleton=True)
 
     db_access.db_mongo_client[platform_id].drop_collection("guildmembers")
 
@@ -27,7 +27,7 @@ def test_prepare_ngu_some_data_ngu_strategy():
     the output should be have the names with the priority of ngu
     """
     platform_id = "515151515151515151515151"
-    db_access = launch_db_access(platform_id)
+    db_access = launch_db_access(platform_id, skip_singleton=True)
 
     db_access.db_mongo_client[platform_id].drop_collection("guildmembers")
 

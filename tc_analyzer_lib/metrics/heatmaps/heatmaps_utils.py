@@ -7,10 +7,10 @@ from tc_analyzer_lib.utils.mongo import MongoSingleton
 class HeatmapsUtils:
     def __init__(self, platform_id: str) -> None:
         self.platform_id = platform_id
-        client = MongoSingleton.get_instance().get_client()
+        client = MongoSingleton.get_instance().get_async_client()
         self.database = client[platform_id]
 
-    def get_users(self, is_bot: bool = False) -> Cursor:
+    async def get_users(self, is_bot: bool = False) -> Cursor:
         """
         get the users of a platform
 
@@ -32,7 +32,7 @@ class HeatmapsUtils:
         )
         return cursor
 
-    def get_active_users(
+    async def get_active_users(
         self,
         start_day: datetime,
         end_day: datetime,
@@ -59,34 +59,34 @@ class HeatmapsUtils:
         if metadata_filter is None:
             metadata_filter = {}
 
-        cursor = self.database["rawmemberactivities"].aggregate(
-            [
-                {
-                    "$match": {
-                        "date": {"$gte": start_day, "$lt": end_day},
-                        "metadata.bot_activity": False,
-                        **metadata_filter,
-                    }
-                },
-                {
-                    "$group": {
-                        "_id": None,
-                        "all_ids": {"$addToSet": "$interactions.users_engaged_id"},
-                        "author_ids": {"$addToSet": "$author_id"},
-                    }
-                },
-                {
-                    "$project": {
-                        "_id": 0,
-                        "combined_engaged_ids": {"$setUnion": ["$all_ids"]},
-                        "combined_author_ids": {"$setUnion": ["$author_ids"]},
-                    }
-                },
-            ]
-        )
+        pipeline = [
+            {
+                "$match": {
+                    "date": {"$gte": start_day, "$lt": end_day},
+                    "metadata.bot_activity": False,
+                    **metadata_filter,
+                }
+            },
+            {
+                "$group": {
+                    "_id": None,
+                    "all_ids": {"$addToSet": "$interactions.users_engaged_id"},
+                    "author_ids": {"$addToSet": "$author_id"},
+                }
+            },
+            {
+                "$project": {
+                    "_id": 0,
+                    "combined_engaged_ids": {"$setUnion": ["$all_ids"]},
+                    "combined_author_ids": {"$setUnion": ["$author_ids"]},
+                }
+            },
+        ]
+
+        cursor = self.database["rawmemberactivities"].aggregate(pipeline)
 
         combined_ids = []
-        for doc in cursor:
+        async for doc in cursor:
             combined_ids.extend(doc.get("combined_author_ids", []))
             nested_list = doc.get("combined_engaged_ids", [])
             combined_ids.extend(sum(sum(nested_list, []), []))
@@ -94,7 +94,7 @@ class HeatmapsUtils:
         # making the values to be unique
         return list(set(combined_ids))
 
-    def get_active_resources_period(
+    async def get_active_resources_period(
         self,
         start_day: datetime,
         end_day: datetime,
@@ -149,12 +149,12 @@ class HeatmapsUtils:
         results = self.database["rawmemberactivities"].aggregate(pipeline)
 
         unique_resource_ids = []
-        for doc in results:
+        async for doc in results:
             unique_resource_ids = doc.get("unique_resource_ids", [])
 
         return unique_resource_ids
 
-    def get_users_count(self, is_bot: bool = False) -> int:
+    async def get_users_count(self, is_bot: bool = False) -> int:
         """
         get the count of users
 
@@ -169,12 +169,12 @@ class HeatmapsUtils:
         users_count : int
             the count of users
         """
-        users_count = self.database["rawmembers"].count_documents(
+        users_count = await self.database["rawmembers"].count_documents(
             {"is_bot": is_bot},
         )
         return users_count
 
-    def get_last_date(self) -> datetime | None:
+    async def get_last_date(self) -> datetime | None:
         """
         get the last document's date
         """
@@ -184,7 +184,7 @@ class HeatmapsUtils:
             .sort("date", -1)
             .limit(1)
         )
-        documents = list(cursor)
+        documents = await cursor.to_list(length=None)
         last_date = documents[0]["date"] if documents != [] else None
 
         return last_date

@@ -1,17 +1,17 @@
 from datetime import datetime
-from unittest import TestCase
+from unittest import IsolatedAsyncioTestCase
 
 from tc_analyzer_lib.metrics.heatmaps.analytics_hourly import AnalyticsHourly
 from tc_analyzer_lib.utils.mongo import MongoSingleton
 
 
-class TestHeatmapsRawAnalyticsVectorsInteractions(TestCase):
+class TestHeatmapsRawAnalyticsVectorsInteractions(IsolatedAsyncioTestCase):
     """
     test the 24 hour vector
     """
 
     def setUp(self) -> None:
-        client = MongoSingleton.get_instance().get_client()
+        client = MongoSingleton.get_instance(skip_singleton=True).get_client()
         platform_id = "781298"
         database = client[platform_id]
         database.drop_collection("rawmemberactivities")
@@ -19,9 +19,9 @@ class TestHeatmapsRawAnalyticsVectorsInteractions(TestCase):
 
         self.analytics = AnalyticsHourly(platform_id)
 
-    def test_empty_data(self):
+    async def test_empty_data(self):
         day = datetime(2023, 1, 1)
-        activity_vector = self.analytics.analyze(
+        activity_vector = await self.analytics.analyze(
             day,
             activity="interactions",
             activity_name="reply",
@@ -34,7 +34,7 @@ class TestHeatmapsRawAnalyticsVectorsInteractions(TestCase):
         self.assertEqual(len(activity_vector), 24)
         self.assertEqual(sum(activity_vector), 0)
 
-    def test_no_relevant_data(self):
+    async def test_no_relevant_data(self):
         day = datetime(2023, 1, 1)
 
         sample_raw_data = [
@@ -71,7 +71,7 @@ class TestHeatmapsRawAnalyticsVectorsInteractions(TestCase):
         ]
         self.database["rawmemberactivities"].insert_many(sample_raw_data)
 
-        activity_vector = self.analytics.analyze(
+        activity_vector = await self.analytics.analyze(
             day,
             activity="interactions",
             activity_name="reply",
@@ -84,7 +84,7 @@ class TestHeatmapsRawAnalyticsVectorsInteractions(TestCase):
         self.assertEqual(len(activity_vector), 24)
         self.assertEqual(sum(activity_vector), 0)
 
-    def test_single_relevant_data_type_receiver(self):
+    async def test_single_relevant_data_type_receiver(self):
         day = datetime(2023, 1, 1)
 
         sample_raw_data = [
@@ -151,7 +151,7 @@ class TestHeatmapsRawAnalyticsVectorsInteractions(TestCase):
         ]
         self.database["rawmemberactivities"].insert_many(sample_raw_data)
 
-        activity_vector = self.analytics.analyze(
+        activity_vector = await self.analytics.analyze(
             day,
             activity="interactions",
             activity_name="reply",
@@ -192,7 +192,7 @@ class TestHeatmapsRawAnalyticsVectorsInteractions(TestCase):
             ],
         )
 
-    def test_single_relevant_data(self):
+    async def test_single_relevant_data(self):
         day = datetime(2023, 1, 1)
 
         sample_raw_data = [
@@ -229,7 +229,7 @@ class TestHeatmapsRawAnalyticsVectorsInteractions(TestCase):
         ]
         self.database["rawmemberactivities"].insert_many(sample_raw_data)
 
-        activity_vector = self.analytics.analyze(
+        activity_vector = await self.analytics.analyze(
             day,
             activity="interactions",
             activity_name="reply",
@@ -272,7 +272,7 @@ class TestHeatmapsRawAnalyticsVectorsInteractions(TestCase):
             ],
         )
 
-    def test_multiple_relevant_data(self):
+    async def test_multiple_relevant_data(self):
         day = datetime(2023, 1, 1)
 
         sample_raw_data = [
@@ -310,7 +310,7 @@ class TestHeatmapsRawAnalyticsVectorsInteractions(TestCase):
         ]
         self.database["rawmemberactivities"].insert_many(sample_raw_data)
 
-        activity_vector = self.analytics.analyze(
+        activity_vector = await self.analytics.analyze(
             day,
             author_id=9001,
             activity="interactions",
@@ -351,11 +351,11 @@ class TestHeatmapsRawAnalyticsVectorsInteractions(TestCase):
             ],
         )
 
-    def test_replier_wrong_activity_type(self):
+    async def test_replier_wrong_activity_type(self):
         day = datetime(2023, 1, 1)
 
         with self.assertRaises(AttributeError):
-            self.analytics.analyze(
+            await self.analytics.analyze(
                 activity="interactions",
                 activity_name="reply",
                 day=day,
@@ -363,11 +363,11 @@ class TestHeatmapsRawAnalyticsVectorsInteractions(TestCase):
                 activity_direction="wrong_type",
             )
 
-    def test_replier_wrong_activity(self):
+    async def test_replier_wrong_activity(self):
         day = datetime(2023, 1, 1)
 
         with self.assertRaises(AttributeError):
-            self.analytics.analyze(
+            await self.analytics.analyze(
                 activity="activity1",
                 activity_name="reply",
                 day=day,

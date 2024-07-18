@@ -1,4 +1,4 @@
-# test analyzing memberactivities
+import asyncio
 from datetime import datetime, timedelta
 
 from .utils.analyzer_setup import launch_db_access
@@ -12,7 +12,7 @@ def test_analyzer_from_start_one_interval():
     # first create the collections
     platform_id = "515151515151515151515151"
     guildId = "1234"
-    db_access = launch_db_access(platform_id)
+    db_access = launch_db_access(platform_id, skip_singleton=True)
 
     analyzer = setup_platform(db_access, platform_id, discordId_list=["user_0"])
 
@@ -41,7 +41,7 @@ def test_analyzer_from_start_one_interval():
     db_access.db_mongo_client[platform_id].drop_collection("heatmaps")
     db_access.db_mongo_client[platform_id].drop_collection("memberactivities")
 
-    analyzer.recompute()
+    asyncio.run(analyzer.recompute())
 
     memberactivities_data = db_access.db_mongo_client[platform_id][
         "memberactivities"

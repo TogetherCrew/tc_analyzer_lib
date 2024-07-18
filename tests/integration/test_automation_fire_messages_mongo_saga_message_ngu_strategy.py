@@ -17,7 +17,7 @@ def test_automation_fire_message_check_mongodb_document_messages_ngu_strategy():
     """
     guild_id = "1234"
     platform_id = "515151515151515151515151"
-    db_access = launch_db_access(platform_id)
+    db_access = launch_db_access(platform_id, skip_singleton=True)
 
     db_access.db_mongo_client[platform_id].drop_collection("memberactivities")
     db_access.db_mongo_client["Saga"].drop_collection("sagas")

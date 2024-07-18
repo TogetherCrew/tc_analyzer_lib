@@ -1,30 +1,30 @@
 from datetime import datetime
-from unittest import TestCase
+from unittest import IsolatedAsyncioTestCase
 
 from tc_analyzer_lib.metrics.heatmaps.heatmaps_utils import HeatmapsUtils
 from tc_analyzer_lib.utils.mongo import MongoSingleton
 
 
-class TestHeatmapsUtilsActiveResources(TestCase):
+class TestHeatmapsUtilsActiveResources(IsolatedAsyncioTestCase):
     def setUp(self) -> None:
-        client = MongoSingleton.get_instance().get_client()
+        client = MongoSingleton.get_instance(skip_singleton=True).get_client()
         self.platform_id = "1234567890"
         self.database = client[self.platform_id]
         self.database.drop_collection("rawmemberactivities")
 
         self.utils = HeatmapsUtils(self.platform_id)
 
-    def test_get_users_empty_collection(self):
+    async def test_get_users_empty_collection(self):
         start_day = datetime(2024, 1, 1)
         end_day = datetime(2024, 1, 2)
-        users = self.utils.get_active_resources_period(
+        users = await self.utils.get_active_resources_period(
             start_day,
             end_day,
             resource_identifier="channel_id",
         )
         self.assertEqual(list(users), [])
 
-    def test_get_multiple_users(self):
+    async def test_get_multiple_users(self):
         start_day = datetime(2024, 1, 1)
         end_day = datetime(2024, 1, 2)
         samples = [
@@ -99,7 +99,7 @@ class TestHeatmapsUtilsActiveResources(TestCase):
         ]
         self.database["rawmemberactivities"].insert_many(samples)
 
-        users = self.utils.get_active_resources_period(
+        users = await self.utils.get_active_resources_period(
             start_day,
             end_day,
             resource_identifier="channel_id",
@@ -107,7 +107,7 @@ class TestHeatmapsUtilsActiveResources(TestCase):
 
         self.assertEqual(set(users), set(["11111", "22222", "44444"]))
 
-    def test_get_multiple_users_with_metadata_filter(self):
+    async def test_get_multiple_users_with_metadata_filter(self):
         start_day = datetime(2024, 1, 1)
         end_day = datetime(2024, 1, 2)
         samples = [
@@ -182,7 +182,7 @@ class TestHeatmapsUtilsActiveResources(TestCase):
         ]
         self.database["rawmemberactivities"].insert_many(samples)
 
-        users = self.utils.get_active_resources_period(
+        users = await self.utils.get_active_resources_period(
             start_day,
             end_day,
             resource_identifier="channel_id",

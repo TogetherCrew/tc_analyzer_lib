@@ -10,7 +10,7 @@ def test_automation_base_get_users_no_data_new_disengaged():
     try to get the users in case of no data available
     """
     platform_id = "515151515151515151515151"
-    db_access = launch_db_access(platform_id)
+    db_access = launch_db_access(platform_id, skip_singleton=True)
 
     db_access.db_mongo_client[platform_id].drop_collection("memberactivities")
 
@@ -28,7 +28,7 @@ def test_automation_base_get_users_no_data_new_active():
     try to get the users in case of no data available
     """
     platform_id = "515151515151515151515151"
-    db_access = launch_db_access(platform_id)
+    db_access = launch_db_access(platform_id, skip_singleton=True)
 
     db_access.db_mongo_client[platform_id].drop_collection("memberactivities")
 
@@ -46,7 +46,7 @@ def test_automation_base_get_users_empty_new_disengaged():
     get empty users in case of no data available
     """
     platform_id = "515151515151515151515151"
-    db_access = launch_db_access(platform_id)
+    db_access = launch_db_access(platform_id, skip_singleton=True)
 
     db_access.db_mongo_client[platform_id].drop_collection("memberactivities")
     db_access.db_mongo_client[platform_id]["memberactivities"].delete_many({})
@@ -124,7 +124,7 @@ def test_automation_base_get_users_empty_new_active():
     get empty users in case of no data available
     """
     platform_id = "515151515151515151515151"
-    db_access = launch_db_access(platform_id)
+    db_access = launch_db_access(platform_id, skip_singleton=True)
 
     db_access.db_mongo_client[platform_id].drop_collection("memberactivities")
     db_access.db_mongo_client[platform_id]["memberactivities"].delete_many({})

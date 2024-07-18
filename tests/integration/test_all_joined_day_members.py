@@ -116,16 +116,7 @@ class TestAllJoinedDay(IsolatedAsyncioTestCase):
             elif (today - date).days == 12:
                 assert joined_day == set()
                 assert joined == {"user_1", "user_0"}
-            elif (today - date).days == 11:
-                assert joined_day == set()
-                assert joined == {"user_1", "user_0"}
-            elif (today - date).days == 10:
-                assert joined_day == set()
-                assert joined == {"user_1", "user_0"}
-            elif (today - date).days == 9:
-                assert joined_day == set()
-                assert joined == {"user_1", "user_0"}
-            elif (today - date).days == 8:
+            elif 8 <= (today - date).days <= 11:
                 assert joined_day == set()
                 assert joined == {"user_1", "user_0"}
             elif (today - date).days == 7:

@@ -140,4 +140,4 @@ class TestAnalyzerWeekRecompute(IsolatedAsyncioTestCase):
         # last document must be for yesterday
 
         for document in heatmaps_data:
-            document["date"] in heatmaps_expected_dates
+            assert document["date"] in heatmaps_expected_dates

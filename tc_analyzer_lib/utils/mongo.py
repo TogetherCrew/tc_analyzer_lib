@@ -40,8 +40,17 @@ class MongoSingleton:
         return self.async_client
 
     def close(self):
-        self.client.close()
-        self.async_client.close()
+        # Attempt to close the clients gracefully
+        try:
+            self.async_client.close()
+        except Exception as e:
+            logging.error(f"Failed to close async mongo client: {e}")
+        
+        try:
+            self.client.close()
+        except Exception as e:
+            logging.error(f"Failed to close mongo client: {e}")
+
         self.__instance = None
 
 

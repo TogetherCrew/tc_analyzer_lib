@@ -121,6 +121,7 @@ class AnalyticsHourly:
             pipeline.extend(
                 [
                     {"$unwind": "$interactions.users_engaged_id"},
+                    # ignoring self-interactions
                     {
                         "$match": {
                             "$expr": {

@@ -21,7 +21,7 @@ class TestNetworkGraphThreeMonthRunOnceAnalytics(IsolatedAsyncioTestCase):
         guildId = "1234"
         platform_id = "515151515151515151515151"
         community_id = "aabbccddeeff001122334455"
-        db_access = launch_db_access(guildId)
+        db_access = launch_db_access(guildId, skip_singleton=True)
         neo4j_ops = Neo4jOps.get_instance()
 
         neo4j_ops.gds.run_cypher(

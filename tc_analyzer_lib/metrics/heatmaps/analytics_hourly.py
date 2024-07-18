@@ -6,8 +6,8 @@ from tc_analyzer_lib.utils.mongo import MongoSingleton
 
 
 class AnalyticsHourly:
-    def __init__(self, platform_id: str) -> None:
-        client = MongoSingleton.get_instance().get_async_client()
+    def __init__(self, platform_id: str, testing: bool = False) -> None:
+        client = MongoSingleton.get_instance(skip_singleton=testing).get_async_client()
         # `rawmemberactivities` is the collection we would use for analytics
         self.collection = client[platform_id]["rawmemberactivities"]
         self.msg_prefix = f"PLATFORMID: {platform_id}:"

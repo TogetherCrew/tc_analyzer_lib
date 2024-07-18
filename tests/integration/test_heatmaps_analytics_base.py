@@ -8,7 +8,7 @@ from tc_analyzer_lib.utils.mongo import MongoSingleton
 class TestHeatmapsAnalyticsBaseWithFilter(IsolatedAsyncioTestCase):
     def setUp(self) -> None:
         self.platform_id = "3456789"
-        self.raw_data_model = AnalyticsHourly(self.platform_id)
+        self.raw_data_model = AnalyticsHourly(self.platform_id, testing=True)
         self.mongo_client = MongoSingleton.get_instance(
             skip_singleton=True
         ).get_client()

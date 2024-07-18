@@ -45,7 +45,7 @@ class MongoSingleton:
             self.async_client.close()
         except Exception as e:
             logging.error(f"Failed to close async mongo client: {e}")
-        
+
         try:
             self.client.close()
         except Exception as e:

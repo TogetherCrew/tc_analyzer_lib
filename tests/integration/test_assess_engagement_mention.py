@@ -53,7 +53,7 @@ class TestAssessEngagementMentions(IsolatedAsyncioTestCase):
             remove_heatmaps=False,
         )
 
-    def test_single_user_mention(self):
+    async def test_single_user_mention(self):
         """
         just actions and no interaction
         """
@@ -133,7 +133,8 @@ class TestAssessEngagementMentions(IsolatedAsyncioTestCase):
         self.db_access.db_mongo_client[self.heatmaps.platform_id][
             "rawmemberactivities"
         ].insert_many(rawinfo_samples)
-        self.heatmaps_analytics()
+
+        await self.heatmaps_analytics()
 
         activity_dict: dict[str, dict] = {
             "all_joined": {"0": set()},

@@ -18,7 +18,6 @@ class TestNetworkGraphOneYearRunOnce(IsolatedAsyncioTestCase):
         and use recompute method with some analytics data available
         """
         # first create the collections
-        guildId = "1234"
         community_id = "aabbccddeeff001122334455"
         platform_id = "515151515151515151515151"
         db_access = launch_db_access(platform_id, skip_singleton=True)

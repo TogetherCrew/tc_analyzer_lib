@@ -44,11 +44,11 @@ class TestAssessEngagementMentions(IsolatedAsyncioTestCase):
         analytics_data = {}
         analytics_data["heatmaps"] = heatmaps_data
         analytics_data["memberactivities"] = (None, None)
-        grpah_schema = GraphSchema(platform=self.heatmaps.analyzer_config.platform)
+        graph_schema = GraphSchema(platform=self.heatmaps.analyzer_config.platform)
         self.db_connections.store_analytics_data(
             platform_id=self.heatmaps.platform_id,
             analytics_data=analytics_data,
-            graph_schema=grpah_schema,
+            graph_schema=graph_schema,
             remove_memberactivities=False,
             remove_heatmaps=False,
         )

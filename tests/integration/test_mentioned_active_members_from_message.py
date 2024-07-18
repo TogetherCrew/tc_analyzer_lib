@@ -5,7 +5,7 @@ from .utils.analyzer_setup import launch_db_access
 from .utils.setup_platform import setup_platform
 
 
-class TestMentoinActiveMembers(IsolatedAsyncioTestCase):
+class TestMentionActiveMembers(IsolatedAsyncioTestCase):
     async def test_mention_active_members_from_rawinfo(self):
         """
         test whether the people are being mentioned are active or not

@@ -136,7 +136,6 @@ class AnalyticsRaw:
         ]
 
         results = await self.get_aggregate_results(pipeline)
-        print("results", results)
         return self._prepare_raw_analytics_item(author_id, results)
 
     async def get_aggregate_results(self, pipeline):

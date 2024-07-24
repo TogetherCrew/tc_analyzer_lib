@@ -40,9 +40,10 @@ class ProjectionUtils:
             projection_query : str
                 the projection query for nodes `a` and `b` and the relation `r`
                 default is
-                    `MATCH (a:DiscordAccount)
-                -[r:INTERACTED_WITH {{guildId: '{guildId}'}}]->
-                (b:DiscordAccount)`
+                    `MATCH (a:[Platform]Member)
+                -[r:INTERACTED_WITH {{platformId: '{platformId}'}}]->
+                (b:[Platform]Member)`
+                if this kwarg was given, then the projection query will be overriden
             date : float
                 if we want to include date in the graph projection query
         """
@@ -67,6 +68,7 @@ class ProjectionUtils:
                    -[r:{self.between_user_label} {{platformId: '{self.platform_id}'}}]->
                    (b:{self.user_label})  """
 
+        # overriding the projection_query
         if "projection_query" in kwargs:
             projection_query = kwargs["projection_query"]
 

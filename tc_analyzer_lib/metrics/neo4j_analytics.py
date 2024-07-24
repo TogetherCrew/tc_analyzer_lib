@@ -3,10 +3,12 @@ import logging
 
 from tc_analyzer_lib.algorithms.neo4j_analysis.analyzer_node_stats import NodeStats
 from tc_analyzer_lib.algorithms.neo4j_analysis.centrality import Centerality
+from tc_analyzer_lib.algorithms.neo4j_analysis.closeness_centrality import (
+    ClosenessCentrality,
+)
 from tc_analyzer_lib.algorithms.neo4j_analysis.local_clustering_coefficient import (
     LocalClusteringCoeff,
 )
-from tc_analyzer_lib.algorithms.neo4j_analysis.closeness_centrality import ClosenessCentrality
 from tc_analyzer_lib.algorithms.neo4j_analysis.louvain import Louvain
 from tc_analyzer_lib.schemas import GraphSchema
 from tc_neo4j_lib.neo4j_ops import Neo4jOps
@@ -75,16 +77,15 @@ class Neo4JAnalytics:
                 f"{self.log_prefix}Exception in computing LocalClusteringCoefficient, {exp}"
             )
 
-    def compute_closeness_centrality(
-            self,
-            from_start: bool
-    ):
+    def compute_closeness_centrality(self, from_start: bool):
         """
         compute the closeness centrality of users of the platform
         """
         try:
             logging.info(f"{self.log_prefix}Computing Closeness Centrality score!")
-            closeness_centrality = ClosenessCentrality(self.platform_id, self.graph_schema)
+            closeness_centrality = ClosenessCentrality(
+                self.platform_id, self.graph_schema
+            )
             closeness_centrality.compute(from_start)
         except Exception as exp:
             logging.error(

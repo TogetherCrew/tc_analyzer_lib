@@ -78,12 +78,9 @@ class TestClosenessCentralityWithMutualTies(TestCase):
         for _, row in results.iterrows():
             self.assertEqual(row["date"], yesterday)
 
-            if row["userid"] == "a":
-                self.assertEqual(row["closenessScore"], 1)
-            elif row["userid"] == "b":
-                self.assertAlmostEqual(row["closenessScore"], 2 / 3)
-            elif row["userid"] == "c":
-                self.assertAlmostEqual(row["closenessScore"], 2 / 3)
+            if row["userid"] == "a" or row["userid"] == "b" or row["userid"] == "c":
+                expected_score = 1 if row["userid"] == "a" else 2 / 3
+                self.assertAlmostEqual(row["closenessScore"], expected_score)
             else:
                 raise ValueError("Never should reach here!")
 
@@ -155,11 +152,7 @@ class TestClosenessCentralityWithMutualTies(TestCase):
         for _, row in yesterday_results.iterrows():
             self.assertEqual(row["date"], yesterday)
 
-            if row["userid"] == "a":
-                self.assertEqual(row["closenessScore"], 0.1)
-            elif row["userid"] == "b":
-                self.assertAlmostEqual(row["closenessScore"], 0.1)
-            elif row["userid"] == "c":
+            if row["userid"] == "a" or row["userid"] == "b" or row["userid"] == "c":
                 self.assertAlmostEqual(row["closenessScore"], 0.1)
             else:
                 raise ValueError("Never should reach here!")
@@ -251,12 +244,9 @@ class TestClosenessCentralityWithMutualTies(TestCase):
         for _, row in yesterday_results.iterrows():
             self.assertEqual(row["date"], yesterday)
 
-            if row["userid"] == "a":
-                self.assertEqual(row["closenessScore"], 1)
-            elif row["userid"] == "b":
-                self.assertAlmostEqual(row["closenessScore"], 2 / 3)
-            elif row["userid"] == "c":
-                self.assertAlmostEqual(row["closenessScore"], 2 / 3)
+            if row["userid"] == "a" or row["userid"] == "b" or row["userid"] == "c":
+                expected_score = 1 if row["userid"] == "a" else 2 / 3
+                self.assertAlmostEqual(row["closenessScore"], expected_score)
             else:
                 raise ValueError("Never should reach here!")
 

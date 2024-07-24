@@ -6,6 +6,7 @@ from tc_analyzer_lib.algorithms.neo4j_analysis.centrality import Centerality
 from tc_analyzer_lib.algorithms.neo4j_analysis.local_clustering_coefficient import (
     LocalClusteringCoeff,
 )
+from tc_analyzer_lib.algorithms.neo4j_analysis.closeness_centrality import ClosenessCentrality
 from tc_analyzer_lib.algorithms.neo4j_analysis.louvain import Louvain
 from tc_analyzer_lib.schemas import GraphSchema
 from tc_neo4j_lib.neo4j_ops import Neo4jOps
@@ -49,6 +50,7 @@ class Neo4JAnalytics:
         self.compute_local_clustering_coefficient(from_start)
         self.compute_network_decentrality(from_start)
         self.compute_node_stats(from_start)
+        self.compute_closeness_centrality(from_start)
 
     def compute_local_clustering_coefficient(self, from_start: bool):
         """
@@ -71,6 +73,22 @@ class Neo4JAnalytics:
         except Exception as exp:
             logging.error(
                 f"{self.log_prefix}Exception in computing LocalClusteringCoefficient, {exp}"
+            )
+
+    def compute_closeness_centrality(
+            self,
+            from_start: bool
+    ):
+        """
+        compute the closeness centrality of users of the platform
+        """
+        try:
+            logging.info(f"{self.log_prefix}Computing Closeness Centrality score!")
+            closeness_centrality = ClosenessCentrality(self.platform_id, self.graph_schema)
+            closeness_centrality.compute(from_start)
+        except Exception as exp:
+            logging.error(
+                f"{self.log_prefix}Exception in computing Closeness Centrlaity score, {exp}"
             )
 
     def compute_fragmentation_score(

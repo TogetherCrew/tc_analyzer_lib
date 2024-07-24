@@ -29,7 +29,6 @@ class TestClosenessCentrality(TestCase):
         user_label = graph_schema.user_label
         platform_label = graph_schema.platform_label
         interacted_with = graph_schema.interacted_with_rel
-        interacted_in = graph_schema.interacted_in_rel
         is_member = graph_schema.member_relation
 
         # creating some nodes with data
@@ -96,7 +95,6 @@ class TestClosenessCentrality(TestCase):
         user_label = graph_schema.user_label
         platform_label = graph_schema.platform_label
         interacted_with = graph_schema.interacted_with_rel
-        interacted_in = graph_schema.interacted_in_rel
         is_member = graph_schema.member_relation
 
         # creating some nodes with data

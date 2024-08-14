@@ -1,4 +1,3 @@
-from tc_analyzer_lib.utils.get_automation_env import get_automations_env
 from tc_analyzer_lib.utils.mongo import MongoSingleton
 
 from .interfaces import Automation
@@ -11,9 +10,8 @@ class AutomationDB:
         """
         instance = MongoSingleton.get_instance()
         self.client = instance.get_client()
-        at_env_vars = get_automations_env()
-        self.db_name = at_env_vars["DB_NAME"]
-        self.collection_name = at_env_vars["COLLECTION_NAME"]
+        self.db_name = "Automation"
+        self.collection_name = "automations"
 
     def load_from_db(self, guild_id: str) -> list[Automation]:
         """

@@ -27,11 +27,13 @@ def publish_on_success(platform_id: str, recompute: bool) -> None:
         else, just run the automation
     """
 
-    msg = f"PLATFORMID: {platform_id}: "
+    msg = f"PLATFORMID: {platform_id} "
     logging.info(f"{msg}publishing task done to CM")
 
     guild_id = get_platform_guild_id(platform_id)
     platform_name = get_platform_name(platform_id)
+
+    msg += f"GUILDID: {guild_id} | "
 
     automation_workflow = AutomationWorkflow()
     # working specifically for discord

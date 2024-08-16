@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 from bson import ObjectId
@@ -46,10 +47,20 @@ class Platform:
         if existance is False:
             raise AttributeError("No such a platform available!")
 
-        self.client["Core"]["platforms"].update_one(
-            {"_id": ObjectId(self.platform_id)},
-            {"$set": {"metadata.isInProgress": False}},
-        )
+        try:
+            logging.info(
+                f"Updating the isInProgress field of platform_id: {self.platform_id}!"
+            )
+            self.client["Core"]["platforms"].update_one(
+                {"_id": ObjectId(self.platform_id)},
+                {"$set": {"metadata.isInProgress": False}},
+            )
+            logging.info(f"PLATFORMID: {self.platform_id} isInProgress field updated!")
+        except Exception as exp:
+            logging.error(
+                f"Failed to update isInProgress field for platform: {self.platform_id}"
+                f"| Exception: {exp}"
+            )
 
     def get_community_id(self) -> str:
         """

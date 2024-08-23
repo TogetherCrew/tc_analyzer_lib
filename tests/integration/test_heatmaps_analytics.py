@@ -156,7 +156,9 @@ class TestHeatmapsAnalytics(IsolatedAsyncioTestCase):
             sample_raw_data
         )
 
-        analytics = await self.heatmaps.start(from_start=True)
+        analytics = []
+        async for heatmaps_data in self.heatmaps.start(from_start=True):
+            analytics.extend(heatmaps_data)
 
         self.assertIsInstance(analytics, list)
 

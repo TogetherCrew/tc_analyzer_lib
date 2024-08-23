@@ -39,7 +39,9 @@ class TestAssessEngagementReplies(IsolatedAsyncioTestCase):
         """
         heatmaps are the input for assess_engagement's interaction matrix
         """
-        heatmaps_data = await self.heatmaps.start(from_start=True)
+        heatmaps_data = []
+        async for results in self.heatmaps.start(from_start=True):
+            heatmaps_data.extend(results)
 
         analytics_data = {}
         analytics_data["heatmaps"] = heatmaps_data

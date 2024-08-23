@@ -86,7 +86,7 @@ class Heatmaps:
             )
             end_day = start_day + timedelta(days=1)
             logging.info(
-                f"{log_prefix} ANALYZING HEATMAPS {start_day.date()} - {end_day.date()}!"
+                f"{log_prefix} ANALYZING HEATMAPS {start_day.date()} - {end_day.date()}! | index: {index}"
             )
 
             # getting the active resource_ids (activities being done there by users)
@@ -155,10 +155,10 @@ class Heatmaps:
 
                 heatmaps_results.extend(day_results)
 
-                if index % batch_return == 0:
-                    yield heatmaps_results
-                    # emptying it
-                    heatmaps_results = []
+            if index % batch_return == 0:
+                yield heatmaps_results
+                # emptying it
+                heatmaps_results = []
 
             index += 1
 

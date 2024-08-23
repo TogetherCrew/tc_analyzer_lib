@@ -16,9 +16,9 @@ class TestHeatmapsThrMsgs(IsolatedAsyncioTestCase):
         database.drop_collection("rawmembers")
         # data preparation
         DAY_COUNT = 2
-        day = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(
-            days=DAY_COUNT
-        )
+        day = datetime.now().replace(
+            hour=0, minute=0, second=0, microsecond=0
+        ) - timedelta(days=DAY_COUNT)
         # hours to include interactions
         hours_to_include = [2, 4, 5, 13, 16, 18, 19, 20, 21]
 
@@ -61,7 +61,9 @@ class TestHeatmapsThrMsgs(IsolatedAsyncioTestCase):
                     prepared_rawmemberactivities.append(prepared_rawdata)
 
                     channelIds.add(chId)
-                    dates.add(data_date.replace(hour=0, minute=0, second=0, microsecond=0))
+                    dates.add(
+                        data_date.replace(hour=0, minute=0, second=0, microsecond=0)
+                    )
 
         database["rawmemberactivities"].insert_many(prepared_rawmemberactivities)
         database["rawmembers"].insert_many(prepared_rawmembers)
@@ -75,7 +77,6 @@ class TestHeatmapsThrMsgs(IsolatedAsyncioTestCase):
         results = []
         async for heatmaps_data in analyzer_heatmaps.start(from_start=True):
             results.extend(heatmaps_data)
-        
 
         assert len(results) == len(acc_names) * DAY_COUNT
         for document in results:

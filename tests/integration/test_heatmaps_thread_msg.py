@@ -7,7 +7,7 @@ from tc_analyzer_lib.utils.mongo import MongoSingleton
 
 
 class TestHeatmapsThrMsgs(IsolatedAsyncioTestCase):
-    async def test_thread_messages():
+    async def test_thread_messages(self):
         platform_id = "1122334455"
         mongo_client = MongoSingleton.get_instance(skip_singleton=True).get_client()
         database = mongo_client[platform_id]

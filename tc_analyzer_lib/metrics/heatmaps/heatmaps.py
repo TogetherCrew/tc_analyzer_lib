@@ -39,7 +39,11 @@ class Heatmaps:
         self.analyzer_config = analyzer_config
         self.utils = HeatmapsUtils(platform_id)
 
-    async def start(self, from_start: bool = False) -> list[dict]:
+    async def start(
+        self,
+        from_start: bool = False,
+        batch_return: int = 5,
+    ):
         """
         Based on the rawdata creates and stores the heatmap data
 
@@ -75,6 +79,7 @@ class Heatmaps:
         async for bot in cursor:
             bot_ids.append(bot["id"])
 
+        index = 0
         while analytics_date.date() < datetime.now().date():
             start_day = analytics_date.replace(
                 hour=0, minute=0, second=0, microsecond=0
@@ -150,10 +155,18 @@ class Heatmaps:
 
                 heatmaps_results.extend(day_results)
 
+                if index == batch_return:
+                    yield heatmaps_results
+                    # emptying it
+                    heatmaps_results = []
+
+                index += 1
+
             # analyze next day
             analytics_date += timedelta(days=1)
 
-        return heatmaps_results
+        if heatmaps_results != []:
+            yield heatmaps_results
 
     async def _prepare_heatmaps_document(
         self, date: datetime, resource_id: str, author_id: str

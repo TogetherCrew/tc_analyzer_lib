@@ -155,7 +155,7 @@ class Heatmaps:
 
                 heatmaps_results.extend(day_results)
 
-                if index == batch_return:
+                if index % batch_return == 0:
                     yield heatmaps_results
                     # emptying it
                     heatmaps_results = []
@@ -165,8 +165,8 @@ class Heatmaps:
             # analyze next day
             analytics_date += timedelta(days=1)
 
-        if heatmaps_results != []:
-            yield heatmaps_results
+        # returning any other values
+        yield heatmaps_results
 
     async def _prepare_heatmaps_document(
         self, date: datetime, resource_id: str, author_id: str

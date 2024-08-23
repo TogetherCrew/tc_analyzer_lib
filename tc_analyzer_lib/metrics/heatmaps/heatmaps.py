@@ -160,7 +160,7 @@ class Heatmaps:
                     # emptying it
                     heatmaps_results = []
 
-                index += 1
+            index += 1
 
             # analyze next day
             analytics_date += timedelta(days=1)

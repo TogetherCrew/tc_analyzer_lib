@@ -68,6 +68,10 @@ class HeatmapsUtils:
                 }
             },
             {
+                "$unwind": {"$interactions"},
+            },
+            {"$unwind": {"path": "$interactions.users_engaged_id"}},
+            {
                 "$group": {
                     "_id": None,
                     "all_ids": {"$addToSet": "$interactions.users_engaged_id"},
@@ -77,8 +81,7 @@ class HeatmapsUtils:
             {
                 "$project": {
                     "_id": 0,
-                    "combined_engaged_ids": {"$setUnion": ["$all_ids"]},
-                    "combined_author_ids": {"$setUnion": ["$author_ids"]},
+                    "combined_ids": {"$setUnion": ["$all_ids", "$author_ids"]},
                 }
             },
         ]
@@ -87,9 +90,7 @@ class HeatmapsUtils:
 
         combined_ids = []
         async for doc in cursor:
-            combined_ids.extend(doc.get("combined_author_ids", []))
-            nested_list = doc.get("combined_engaged_ids", [])
-            combined_ids.extend(sum(sum(nested_list, []), []))
+            combined_ids.extend(doc["combined_ids"])
 
         # making the values to be unique
         return list(set(combined_ids))

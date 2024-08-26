@@ -85,20 +85,19 @@ class TCAnalyzer(AnalyzerDBManager):
             resources=self.resources,
             analyzer_config=self.analyzer_config,
         )
-        heatmaps_data = await heatmaps_analysis.start(from_start=False)
+        async for heatmaps_data in heatmaps_analysis.start(from_start=False):
+            # storing heatmaps since memberactivities use them
+            analytics_data = {}
+            analytics_data["heatmaps"] = heatmaps_data
+            analytics_data["memberactivities"] = (None, None)
 
-        # storing heatmaps since memberactivities use them
-        analytics_data = {}
-        analytics_data["heatmaps"] = heatmaps_data
-        analytics_data["memberactivities"] = (None, None)
-
-        self.DB_connections.store_analytics_data(
-            analytics_data=analytics_data,
-            platform_id=self.platform_id,
-            graph_schema=self.graph_schema,
-            remove_memberactivities=False,
-            remove_heatmaps=False,
-        )
+            self.DB_connections.store_analytics_data(
+                analytics_data=analytics_data,
+                platform_id=self.platform_id,
+                graph_schema=self.graph_schema,
+                remove_memberactivities=False,
+                remove_heatmaps=False,
+            )
 
         memberactivity_analysis = MemberActivities(
             platform_id=self.platform_id,
@@ -149,13 +148,12 @@ class TCAnalyzer(AnalyzerDBManager):
             resources=self.resources,
             analyzer_config=self.analyzer_config,
         )
-        heatmaps_data = await heatmaps_analysis.start(from_start=True)
 
-        # storing heatmaps since memberactivities use them
+        # This is to remove heatmaps data
+        # TODO: in future remove heatmaps better instead of using the lines below
         analytics_data = {}
-        analytics_data["heatmaps"] = heatmaps_data
+        analytics_data["heatmaps"] = []
         analytics_data["memberactivities"] = (None, None)
-
         self.DB_connections.store_analytics_data(
             analytics_data=analytics_data,
             platform_id=self.platform_id,
@@ -163,6 +161,20 @@ class TCAnalyzer(AnalyzerDBManager):
             remove_memberactivities=False,
             remove_heatmaps=True,
         )
+
+        async for heatmaps_data in heatmaps_analysis.start(from_start=True):
+            # storing heatmaps since memberactivities use them
+            analytics_data = {}
+            analytics_data["heatmaps"] = heatmaps_data
+            analytics_data["memberactivities"] = (None, None)
+
+            self.DB_connections.store_analytics_data(
+                analytics_data=analytics_data,
+                platform_id=self.platform_id,
+                graph_schema=self.graph_schema,
+                remove_memberactivities=False,
+                remove_heatmaps=False,
+            )
 
         # run the member_activity analyze
         logging.info(

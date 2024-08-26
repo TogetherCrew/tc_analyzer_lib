@@ -33,7 +33,8 @@ class TestAnalyzerWeekRunOnce(IsolatedAsyncioTestCase):
         rawinfo_samples = []
 
         # generating random rawinfo data
-        for i in range(160):
+        # for past 7 days (168 / 24 = 7)
+        for i in range(168):
             author = np.random.choice(acc_id)
             replied_user = np.random.choice(acc_id)
             # not producing any self-interactions

@@ -150,7 +150,9 @@ class TestHeatmapsAnalyticsSingleDay(IsolatedAsyncioTestCase):
             sample_raw_data
         )
 
-        analytics = await self.heatmaps.start(from_start=True)
+        analytics = []
+        async for heatmaps_data in self.heatmaps.start(from_start=True):
+            analytics.extend(heatmaps_data)
 
         self.assertIsInstance(analytics, list)
 
@@ -181,7 +183,10 @@ class TestHeatmapsAnalyticsSingleDay(IsolatedAsyncioTestCase):
             }
         )
 
-        analytics = await self.heatmaps.start(from_start=False)
+        analytics = []
+        async for heatmaps_data in self.heatmaps.start(from_start=False):
+            analytics.extend(heatmaps_data)
+
         # the day was pre-filled before
         # and the period was exactly yesterday
         self.assertEqual(analytics, [])

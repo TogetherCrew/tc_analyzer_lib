@@ -104,7 +104,9 @@ class TestMentionedMessages(IsolatedAsyncioTestCase):
             resources=list(channelIds),
             analyzer_config=DiscordAnalyzerConfig(),
         )
-        results = await analyzer_heatmaps.start(from_start=True)
+        results = []
+        async for heatmaps_data in analyzer_heatmaps.start(from_start=True):
+            results.extend(heatmaps_data)
 
         assert len(results) == len(acc_names) * DAY_COUNT * len(channelIds)
         for document in results:

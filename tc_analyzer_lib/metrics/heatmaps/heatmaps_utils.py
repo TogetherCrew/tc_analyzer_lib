@@ -68,9 +68,9 @@ class HeatmapsUtils:
                 }
             },
             {
-                "$unwind": {"$interactions"},
+                "$unwind": "$interactions",
             },
-            {"$unwind": {"path": "$interactions.users_engaged_id"}},
+            {"$unwind": "$interactions.users_engaged_id"},
             {
                 "$group": {
                     "_id": None,
@@ -81,19 +81,18 @@ class HeatmapsUtils:
             {
                 "$project": {
                     "_id": 0,
-                    "combined_ids": {"$setUnion": ["$all_ids", "$author_ids"]},
+                    "users": {"$setUnion": ["$all_ids", "$author_ids"]},
                 }
             },
         ]
 
         cursor = self.database["rawmemberactivities"].aggregate(pipeline)
 
-        combined_ids = []
+        users = []
         async for doc in cursor:
-            combined_ids.extend(doc["combined_ids"])
+            users.extend(doc["users"])
 
-        # making the values to be unique
-        return list(set(combined_ids))
+        return users
 
     async def get_active_resources_period(
         self,

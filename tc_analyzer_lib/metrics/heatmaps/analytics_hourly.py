@@ -18,7 +18,7 @@ class AnalyticsHourly:
         activity: str,
         activity_name: str,
         activity_direction: str,
-        author_id: str | int,
+        user_ids: list[str | int],
         **kwargs,
     ) -> list[int]:
         """
@@ -34,8 +34,8 @@ class AnalyticsHourly:
             the activity name to be used from `rawmemberactivities` data
             could be `reply`, `mention`, `message`, `commit` or any other
             thing that is available on `rawmemberactivities` data
-        author_id : str
-            the author to filter data for
+        user_ids : list[str | int]
+            the users to filter data for
         activity_direction : str
             should be always either `emitter` or `receiver`
         **kwargs :
@@ -59,7 +59,7 @@ class AnalyticsHourly:
         activity_vector = await self.get_hourly_analytics(
             day=day,
             activity=activity,
-            author_id=author_id,
+            user_ids=user_ids,
             filters={
                 f"{activity}.name": activity_name,
                 f"{activity}.type": activity_direction,
@@ -73,7 +73,7 @@ class AnalyticsHourly:
         self,
         day: date,
         activity: str,
-        author_id: str | int,
+        user_ids: list[str | int],
         filters: dict[str, dict[str, Any] | str] | None = None,
         resource_filters: dict[str, str] | None = None,
     ) -> list[int]:
@@ -86,6 +86,8 @@ class AnalyticsHourly:
             a specific day date
         activity : str
             to be `interactions` or `actions`
+        user_ids : list[str | int]
+            a list of users to compute data for
         filter : dict[str, dict[str] | str] | None
             the filtering that we need to apply on actions or interactions
             for default it is an None meaning
@@ -107,7 +109,7 @@ class AnalyticsHourly:
             {
                 "$match": {
                     "date": {"$gte": start_day, "$lt": end_day},
-                    "author_id": author_id,
+                    "author_id": {"$in": user_ids},
                     **(resource_filters or {}),
                 }
             },
@@ -135,41 +137,29 @@ class AnalyticsHourly:
         pipeline.extend(
             [
                 {"$addFields": {"hour": {"$hour": "$date"}}},
-                {"$group": {"_id": "$hour", "count": {"$sum": 1}}},
+                {
+                    "$group": {
+                        "_id": {
+                            "hour": "$hour",
+                            "user": "$author_id",
+                        },
+                        "count": {"$sum": 1},
+                    }
+                },
                 {"$sort": {"_id": 1}},
             ]
         )
 
         results = await self.get_aggregate_results(pipeline)
-        return self._process_vectors(results)
-
-    async def get_aggregate_results(self, pipeline):
-        results = []
-        async for doc in self.collection.aggregate(pipeline):
-            results.append(doc)
         return results
 
-    def _process_vectors(
-        self, analytics_mongo_results: list[dict[str, int]]
-    ) -> list[int]:
-        """
-        post process the mongodb query aggregation results
+    async def get_aggregate_results(self, pipeline):
+        results = {}
+        async for doc in self.collection.aggregate(pipeline):
+            user = doc["_id"]["user"]
+            hour = doc["_id"]["hour"]
+            activity_count = doc["count"]
+            results.setdefault(user, [0] * 24)
 
-        Parameters
-        ------------
-        analytics_mongo_results : list[dict[str, int]]
-            the mongodb query aggregation results
-            the format of the data should be as below
-            `[{'_id': 0, 'count': 2}, {'_id': 1, 'count': 1}, ...]`
-            the `_id` is hour and `count` is the count of user activity
-
-        Returns
-        ---------
-        hourly_analytics : list[int]
-            a vector with length of 24
-            each index representing the count of actions/interactions for that day
-        """
-        hourly_analytics = [0] * 24
-        for analytics in analytics_mongo_results:
-            hourly_analytics[analytics["_id"]] = analytics["count"]
-        return hourly_analytics
+            doc[user][hour] = activity_count
+        return results

@@ -4,6 +4,7 @@ from typing import Any
 
 from tc_analyzer_lib.metrics.heatmaps import AnalyticsHourly, AnalyticsRaw
 from tc_analyzer_lib.metrics.heatmaps.heatmaps_utils import HeatmapsUtils
+from tc_analyzer_lib.schemas import RawAnalyticsItem
 from tc_analyzer_lib.schemas.platform_configs.config_base import PlatformConfigBase
 
 
@@ -73,12 +74,6 @@ class Heatmaps:
         # initialize the data array
         heatmaps_results = []
 
-        # we should not prepare the bot's data
-        # cursor = await self.utils.get_users(is_bot=True)
-        # bot_ids: list[str] = []
-        # async for bot in cursor:
-        #     bot_ids.append(bot["id"])
-
         index = 0
         while analytics_date.date() < datetime.now().date():
             start_day = analytics_date.replace(
@@ -133,8 +128,11 @@ class Heatmaps:
                     user_ids=user_ids,
                 )
                 heatmaps_doc = self._init_heatmaps_documents(
-                    analytics_dict={**hourly_analytics, **raw_analytics},
+                    hourly_analytics=hourly_analytics,
+                    raw_analytics=raw_analytics,
                     resource_id=resource_id,
+                    user_ids=user_ids,
+                    date=start_day,
                 )
                 heatmaps_results.extend(heatmaps_doc)
 
@@ -150,20 +148,6 @@ class Heatmaps:
 
         # returning any other values
         yield heatmaps_results
-
-    # async def _prepare_heatmaps_document(
-    #     self, date: datetime, resource_id: str, author_id: str
-    # ) -> dict[str, str | datetime]:
-    #     """
-    #     prepare the document for heatmaps analytics
-    #     the hourly analytics and raw analytics data would be added after it
-    #     """
-    #     document = {
-    #         self.analyzer_config.resource_identifier: resource_id,
-    #         "date": datetime(date.year, date.month, date.day),
-    #         "user": author_id,
-    #     }
-    #     return document
 
     async def _process_hourly_analytics(
         self,
@@ -253,9 +237,9 @@ class Heatmaps:
         day: date,
         resource: str,
         user_ids: list[str | int],
-    ) -> dict[str, list[dict]]:
+    ) -> dict[str, list[RawAnalyticsItem]]:
         analytics_raw = AnalyticsRaw(self.platform_id)
-        analytics: dict[str, list[dict]] = {}
+        analytics: dict[str, list[RawAnalyticsItem]] = {}
 
         for config in self.analyzer_config.raw_analytics:
             # default analytics that we always can have
@@ -310,16 +294,19 @@ class Heatmaps:
 
     def _init_heatmaps_documents(
         self,
-        analytics_dict: dict[str, dict[str, list[str | dict]]],
+        hourly_analytics: dict[str, dict[str, list[str | dict]]],
+        raw_analytics: dict[str, dict[str, list[RawAnalyticsItem]]],
         resource_id: str,
+        user_ids: list[str],
+        date: datetime,
     ) -> list[dict[str, Any]]:
         """
-        initialize the heatmaps documents from the given results on analytics_dict
+        initialize the heatmaps documents from the given results on given analytics
 
         Parameters
         -----------
-        analytics_dict : dict[str, dict[str, list[str | dict]]]
-            the dictionary is like
+        hourly_analytics : dict[str, dict[str, list[str | dict]]]
+            analytics data with schema as
             ```
             {
                 "analytics1": {
@@ -337,10 +324,41 @@ class Heatmaps:
                     "user2": [0, 0, 0, 0],
                     "user3": [0, 0, 0, 0],
                 },
+                .
+                .
+                .
+            }
+            ```
+        raw_analytics : dict[str, list[RawAnalyticsItem]]
+            analytics data with schema as
+            ```
+            {
+                "analytics1": {
+                    "user1": {'account': 'user2', 'count': 2},
+                    "user2": {'account': 'user7', 'count': 3},
+                    "user3": {'account': 'user4', 'count': 6},
+                },
+                "analytics2": {
+                    "user1": {'account': 'user3', 'count': 3},
+                    "user2": {'account': 'user1', 'count': 4},
+                    "user3": {'account': 'user9', 'count': 7},
+                },
+                "analytics3": {
+                    "user1": [0, 0, 0, 0],
+                    "user2": [0, 0, 0, 0],
+                    "user3": [0, 0, 0, 0],
+                },
+                .
+                .
+                .
             }
             ```
         resource_id : str
             the resource id to put in list
+        user_ids : list[str]
+            a list of users to include analytics for it
+        date : datetime
+            the date of analytics
 
         Returns
         ---------
@@ -350,20 +368,28 @@ class Heatmaps:
         # the dict with users in first dim and analytics second dim
         restructured_dict = {}
 
-        for analytics_name, users_dict in analytics_dict.items():
-            for user_id, values_list in users_dict.items():
-                restructured_dict.setdefault(user_id, {})
-                restructured_dict[user_id][analytics_name] = values_list
+        for analytics_name, users_dict in hourly_analytics.items():
+            for user in user_ids:
+                restructured_dict.setdefault(user, {})
+                restructured_dict[user][analytics_name] = users_dict.get(user, [0] * 24)
+
+        # raw analytics data have a different format
+        for analytics_name, users_dict in raw_analytics.items():
+            for user in user_ids:
+                restructured_dict.setdefault(user, {})
+                print(users_dict.get(user, []))
+                restructured_dict[user][analytics_name] = [
+                    item.to_dict() for item in users_dict.get(user, [])
+                ]
 
         heatmaps_docs = []
-        for user_id, analytics_dict in restructured_dict:
-            document = [
-                {
-                    "user": user_id,
-                    self.analyzer_config.resource_identifier: resource_id,
-                    **analytics_dict,
-                }
-            ]
+        for user_id, analytics_dict in restructured_dict.items():
+            document = {
+                self.analyzer_config.resource_identifier: resource_id,
+                "date": datetime(date.year, date.month, date.day),
+                "user": user_id,
+                **analytics_dict,
+            }
 
             heatmaps_docs.append(document)
 

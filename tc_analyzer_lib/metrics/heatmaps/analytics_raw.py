@@ -1,6 +1,4 @@
-import logging
 from datetime import date, datetime, time, timedelta
-from typing import Any
 
 from tc_analyzer_lib.schemas import RawAnalyticsItem
 from tc_analyzer_lib.utils.mongo import MongoSingleton
@@ -21,7 +19,7 @@ class AnalyticsRaw:
         activity_direction: str,
         user_ids: list[str | int],
         **kwargs,
-    ) -> list[RawAnalyticsItem]:
+    ) -> dict[str, list[RawAnalyticsItem]]:
         """
         analyze the count of messages
 
@@ -46,7 +44,7 @@ class AnalyticsRaw:
 
         Returns
         ---------
-        activity_count : RawAnalyticsItem
+        activity_count : dict[str, list[RawAnalyticsItem]]
             raw analytics item which holds the user and
             the count of interaction in that day
         """
@@ -82,7 +80,7 @@ class AnalyticsRaw:
         user_ids: list[str | int],
         activity_direction: str,
         **kwargs,
-    ) -> list[RawAnalyticsItem]:
+    ) -> dict[str, list[RawAnalyticsItem]]:
         """
         Gets the list of documents for the stated day
 
@@ -108,8 +106,8 @@ class AnalyticsRaw:
 
         Returns
         ---------
-        activity_count : list[RawAnalyticsItem]
-            raw analytics item which holds the user and
+        activity_count : dict[str, list[RawAnalyticsItem]]
+            raw analytics item which holds the users as key and
             the count of interaction in that day
         """
         start_day = datetime.combine(day, time(0, 0, 0))
@@ -150,15 +148,19 @@ class AnalyticsRaw:
         results = await self.get_aggregate_results(pipeline)
         return results
 
-    async def get_aggregate_results(self, pipeline):
-        results = {}
+    async def get_aggregate_results(
+        self, pipeline
+    ) -> dict[str, list[RawAnalyticsItem]]:
+        results: dict[str, list[RawAnalyticsItem]] = {}
         async for doc in self.collection.aggregate(pipeline):
-            user = doc["author_id"]
-            engaged_user = doc["engaged_user"]
+            user = doc["_id"]["author_id"]
+            results.setdefault(user, [])
+
+            engaged_user = doc["_id"]["engaged_user"]
             engagement_count = doc["count"]
 
-            results[user] = {
-                "account": engaged_user,
-                "count": engagement_count,
-            }
+            results[user].append(
+                RawAnalyticsItem(account=engaged_user, count=engagement_count)
+            )
+
         return results

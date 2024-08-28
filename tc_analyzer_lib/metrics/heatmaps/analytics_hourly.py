@@ -161,5 +161,5 @@ class AnalyticsHourly:
             activity_count = doc["count"]
             results.setdefault(user, [0] * 24)
 
-            doc[user][hour] = activity_count
+            results[user][hour] = activity_count
         return results

@@ -38,20 +38,20 @@ class TestHeatmapsProcessRawAnalyticsSingleDay(IsolatedAsyncioTestCase):
         analytics = await self.heatmaps._process_raw_analytics(
             day=day,
             resource="124",
-            author_id=9000,
+            user_ids=[9000],
         )
         self.assertIn("replied_per_acc", analytics.keys())
         self.assertIn("mentioner_per_acc", analytics.keys())
         self.assertIn("reacted_per_acc", analytics.keys())
 
-        self.assertIsInstance(analytics["replied_per_acc"], list)
-        self.assertEqual(len(analytics["replied_per_acc"]), 0)
+        self.assertIsInstance(analytics["replied_per_acc"], dict)
+        self.assertEqual(analytics["replied_per_acc"], {})
 
-        self.assertIsInstance(analytics["mentioner_per_acc"], list)
-        self.assertEqual(len(analytics["mentioner_per_acc"]), 0)
+        self.assertIsInstance(analytics["mentioner_per_acc"], dict)
+        self.assertEqual(analytics["mentioner_per_acc"], {})
 
-        self.assertIsInstance(analytics["reacted_per_acc"], list)
-        self.assertEqual(len(analytics["reacted_per_acc"]), 0)
+        self.assertIsInstance(analytics["reacted_per_acc"], dict)
+        self.assertEqual(analytics["reacted_per_acc"], {})
 
     async def test_single_author(self):
         platform_id = self.heatmaps.platform_id
@@ -142,24 +142,24 @@ class TestHeatmapsProcessRawAnalyticsSingleDay(IsolatedAsyncioTestCase):
         analytics = await self.heatmaps._process_raw_analytics(
             day=day,
             resource="124",
-            author_id=9001,
+            user_ids=[9001],
         )
 
-        self.assertIsInstance(analytics["replied_per_acc"], list)
-        self.assertIsInstance(analytics["mentioner_per_acc"], list),
-        self.assertIsInstance(analytics["reacted_per_acc"], list),
+        self.assertIsInstance(analytics["replied_per_acc"], dict)
+        self.assertIsInstance(analytics["mentioner_per_acc"], dict),
+        self.assertIsInstance(analytics["reacted_per_acc"], dict),
 
-        self.assertEqual(len(analytics["replied_per_acc"]), 1)
-        self.assertEqual(analytics["replied_per_acc"][0]["account"], 9003)
-        self.assertEqual(analytics["replied_per_acc"][0]["count"], 1)
+        self.assertEqual(len(analytics["replied_per_acc"][9001]), 1)
+        self.assertEqual(analytics["replied_per_acc"][9001][0].account, 9003)
+        self.assertEqual(analytics["replied_per_acc"][9001][0].count, 1)
 
-        self.assertEqual(len(analytics["mentioner_per_acc"]), 2)
-        self.assertIn(analytics["mentioner_per_acc"][0]["account"], [9002, 9003])
-        self.assertEqual(analytics["mentioner_per_acc"][0]["count"], 1)
-        self.assertIn(analytics["mentioner_per_acc"][1]["account"], [9002, 9003])
-        self.assertEqual(analytics["mentioner_per_acc"][1]["count"], 1)
+        self.assertEqual(len(analytics["mentioner_per_acc"][9001]), 2)
+        self.assertIn(analytics["mentioner_per_acc"][9001][0].account, [9002, 9003])
+        self.assertEqual(analytics["mentioner_per_acc"][9001][0].count, 1)
+        self.assertIn(analytics["mentioner_per_acc"][9001][1].account, [9002, 9003])
+        self.assertEqual(analytics["mentioner_per_acc"][9001][1].count, 1)
 
-        self.assertEqual(analytics["reacted_per_acc"], [])
+        self.assertEqual(analytics["reacted_per_acc"], {})
 
     async def test_multiple_authors(self):
         platform_id = self.heatmaps.platform_id
@@ -258,23 +258,23 @@ class TestHeatmapsProcessRawAnalyticsSingleDay(IsolatedAsyncioTestCase):
         analytics = await self.heatmaps._process_raw_analytics(
             day=day,
             resource="124",
-            author_id=9001,
+            user_ids=[9001],
         )
 
-        self.assertIsInstance(analytics["replied_per_acc"], list)
-        self.assertIsInstance(analytics["mentioner_per_acc"], list),
-        self.assertIsInstance(analytics["reacted_per_acc"], list),
+        self.assertIsInstance(analytics["replied_per_acc"], dict)
+        self.assertIsInstance(analytics["mentioner_per_acc"], dict),
+        self.assertIsInstance(analytics["reacted_per_acc"], dict),
 
-        self.assertEqual(analytics["replied_per_acc"], [])
+        self.assertEqual(analytics["replied_per_acc"], {})
 
-        self.assertEqual(len(analytics["mentioner_per_acc"]), 2)
-        self.assertIn(analytics["mentioner_per_acc"][0]["account"], [9003, 9005])
-        self.assertEqual(analytics["mentioner_per_acc"][0]["count"], 1)
-        self.assertIn(analytics["mentioner_per_acc"][1]["account"], [9003, 9005])
-        self.assertEqual(analytics["mentioner_per_acc"][1]["count"], 1)
+        self.assertEqual(len(analytics["mentioner_per_acc"][9001]), 2)
+        self.assertIn(analytics["mentioner_per_acc"][9001][0].account, [9003, 9005])
+        self.assertEqual(analytics["mentioner_per_acc"][9001][0].count, 1)
+        self.assertIn(analytics["mentioner_per_acc"][9001][1].account, [9003, 9005])
+        self.assertEqual(analytics["mentioner_per_acc"][9001][1].count, 1)
 
-        self.assertEqual(len(analytics["reacted_per_acc"]), 2)
-        self.assertIn(analytics["reacted_per_acc"][0]["account"], [9003, 9008])
-        self.assertEqual(analytics["reacted_per_acc"][0]["count"], 1)
-        self.assertIn(analytics["reacted_per_acc"][1]["account"], [9003, 9008])
-        self.assertEqual(analytics["reacted_per_acc"][1]["count"], 1)
+        self.assertEqual(len(analytics["reacted_per_acc"][9001]), 2)
+        self.assertIn(analytics["reacted_per_acc"][9001][0].account, [9003, 9008])
+        self.assertEqual(analytics["reacted_per_acc"][9001][0].count, 1)
+        self.assertIn(analytics["reacted_per_acc"][9001][1].account, [9003, 9008])
+        self.assertEqual(analytics["reacted_per_acc"][9001][1].count, 1)

@@ -1,8 +1,10 @@
 from unittest import TestCase
+import pytest
 
 from tc_analyzer_lib.metrics.heatmaps.analytics_hourly import AnalyticsHourly
 
 
+@pytest.mark.skip("The method has been removed!")
 class TestRawMemberActivitiesProcessVectors(TestCase):
     def setUp(self) -> None:
         self.platform_id = "3456789"

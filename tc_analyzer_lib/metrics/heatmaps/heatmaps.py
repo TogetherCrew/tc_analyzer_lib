@@ -237,9 +237,9 @@ class Heatmaps:
         day: date,
         resource: str,
         user_ids: list[str | int],
-    ) -> dict[str, list[RawAnalyticsItem]]:
+    ) -> dict[str, dict[str, list[RawAnalyticsItem]]]:
         analytics_raw = AnalyticsRaw(self.platform_id)
-        analytics: dict[str, list[RawAnalyticsItem]] = {}
+        analytics: dict[str, dict[str, list[RawAnalyticsItem]]] = {}
 
         for config in self.analyzer_config.raw_analytics:
             # default analytics that we always can have
@@ -295,7 +295,7 @@ class Heatmaps:
     def _init_heatmaps_documents(
         self,
         hourly_analytics: dict[str, dict[str, list[str | dict]]],
-        raw_analytics: dict[str, dict[str, list[RawAnalyticsItem]]],
+        raw_analytics: dict[str, dict[str, dict[str, list[RawAnalyticsItem]]]],
         resource_id: str,
         user_ids: list[str],
         date: datetime,
@@ -329,7 +329,7 @@ class Heatmaps:
                 .
             }
             ```
-        raw_analytics : dict[str, list[RawAnalyticsItem]]
+        raw_analytics : dict[str, dict[str, list[RawAnalyticsItem]]]
             analytics data with schema as
             ```
             {

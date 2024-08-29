@@ -42,7 +42,7 @@ class TestHeatmapsAnalyticsBaseWithFilter(IsolatedAsyncioTestCase):
             day=datetime(2023, 1, 1).date(),
             activity="interactions",
             filters={"interactions.name": "mention"},
-            author_id=9000,
+            user_ids=[9000],
         )
 
         expected_analytics = [
@@ -71,9 +71,9 @@ class TestHeatmapsAnalyticsBaseWithFilter(IsolatedAsyncioTestCase):
             0,
             0,
         ]
-        self.assertIsInstance(hourly_analytics, list)
-        self.assertEqual(len(hourly_analytics), 24)
-        self.assertEqual(hourly_analytics, expected_analytics)
+        self.assertIsInstance(hourly_analytics, dict)
+        self.assertEqual(len(hourly_analytics[9000]), 24)
+        self.assertEqual(hourly_analytics[9000], expected_analytics)
 
     async def test_get_hourly_analytics_single_date_irrelevant_filter(self):
         """
@@ -102,35 +102,8 @@ class TestHeatmapsAnalyticsBaseWithFilter(IsolatedAsyncioTestCase):
             day=datetime(2023, 1, 1).date(),
             activity="interactions",
             filters={"interactions.name": "reply"},
-            author_id=9000,
+            user_ids=[9000],
         )
 
-        expected_analytics = [
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-        ]
-        self.assertIsInstance(hourly_analytics, list)
-        self.assertEqual(len(hourly_analytics), 24)
-        self.assertEqual(hourly_analytics, expected_analytics)
+        self.assertIsInstance(hourly_analytics, dict)
+        self.assertEqual(hourly_analytics, {})

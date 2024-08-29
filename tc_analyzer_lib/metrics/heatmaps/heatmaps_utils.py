@@ -67,10 +67,13 @@ class HeatmapsUtils:
                     **metadata_filter,
                 }
             },
+            {"$unwind": {"path": "$interactions", "preserveNullAndEmptyArrays": True}},
             {
-                "$unwind": "$interactions",
+                "$unwind": {
+                    "path": "$interactions.users_engaged_id",
+                    "preserveNullAndEmptyArrays": True,
+                }
             },
-            {"$unwind": "$interactions.users_engaged_id"},
             {
                 "$group": {
                     "_id": None,

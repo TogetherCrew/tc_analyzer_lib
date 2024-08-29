@@ -1,11 +1,11 @@
-import asyncio
 import logging
 from datetime import date, datetime, timedelta
+from typing import Any
 
 from tc_analyzer_lib.metrics.heatmaps import AnalyticsHourly, AnalyticsRaw
 from tc_analyzer_lib.metrics.heatmaps.heatmaps_utils import HeatmapsUtils
+from tc_analyzer_lib.schemas import RawAnalyticsItem
 from tc_analyzer_lib.schemas.platform_configs.config_base import PlatformConfigBase
-from tc_analyzer_lib.utils.mongo import MongoSingleton
 
 
 class Heatmaps:
@@ -71,13 +71,14 @@ class Heatmaps:
         else:
             analytics_date = last_date + timedelta(days=1)
 
+        # in order to skip bots
+        bot_ids = []
+        bot_cursor = await self.utils.get_users(is_bot=True)
+        async for bot in bot_cursor:
+            bot_ids.append(bot["id"])
+
         # initialize the data array
         heatmaps_results = []
-
-        cursor = await self.utils.get_users(is_bot=True)
-        bot_ids: list[str] = []
-        async for bot in cursor:
-            bot_ids.append(bot["id"])
 
         index = 0
         while analytics_date.date() < datetime.now().date():
@@ -122,38 +123,25 @@ class Heatmaps:
                         " Skipping the day."
                     )
 
-                day_tasks = []
-                for author_id in user_ids:
-                    # skipping doing analytics for bots
-                    if author_id in bot_ids:
-                        continue
-
-                    doc_date = analytics_date.date()
-                    task = asyncio.gather(
-                        self._prepare_heatmaps_document(
-                            doc_date, resource_id, author_id
-                        ),
-                        self._process_hourly_analytics(
-                            day=analytics_date,
-                            resource=resource_id,
-                            author_id=author_id,
-                        ),
-                        self._process_raw_analytics(
-                            day=analytics_date,
-                            resource=resource_id,
-                            author_id=author_id,
-                        ),
-                    )
-                    day_tasks.append(task)
-
-                results = await asyncio.gather(*day_tasks)
-                day_results = []
-                for document, hourly_analytics, raw_analytics in results:
-                    day_results.append(
-                        {**document, **hourly_analytics, **raw_analytics}
-                    )
-
-                heatmaps_results.extend(day_results)
+                hourly_analytics = await self._process_hourly_analytics(
+                    day=analytics_date,
+                    resource=resource_id,
+                    user_ids=user_ids,
+                )
+                raw_analytics = await self._process_raw_analytics(
+                    day=analytics_date,
+                    resource=resource_id,
+                    user_ids=user_ids,
+                )
+                heatmaps_doc = await self._init_heatmaps_documents(
+                    hourly_analytics=hourly_analytics,
+                    raw_analytics=raw_analytics,
+                    resource_id=resource_id,
+                    user_ids=user_ids,
+                    bot_ids=bot_ids,
+                    date=start_day,
+                )
+                heatmaps_results.extend(heatmaps_doc)
 
             if index % batch_return == 0:
                 yield heatmaps_results
@@ -168,25 +156,11 @@ class Heatmaps:
         # returning any other values
         yield heatmaps_results
 
-    async def _prepare_heatmaps_document(
-        self, date: datetime, resource_id: str, author_id: str
-    ) -> dict[str, str | datetime]:
-        """
-        prepare the document for heatmaps analytics
-        the hourly analytics and raw analytics data would be added after it
-        """
-        document = {
-            self.analyzer_config.resource_identifier: resource_id,
-            "date": datetime(date.year, date.month, date.day),
-            "user": author_id,
-        }
-        return document
-
     async def _process_hourly_analytics(
         self,
         day: date,
         resource: str,
-        author_id: str | int,
+        user_ids: list[str | int],
     ) -> dict[str, list]:
         """
         start processing hourly analytics for a day based on given config
@@ -197,11 +171,14 @@ class Heatmaps:
             analyze for a specific day
         resurce : str
             the resource we want to apply the filtering on
-        author_id : str | int
-            the author to filter data for
+        user_ids : list[str | int]
+            users we want the analytics for
         """
         analytics_hourly = AnalyticsHourly(self.platform_id)
-        analytics: dict[str, list[int]] = {}
+
+        # first dict user analytics
+        # second dict each hourly analytics item
+        analytics: dict[str, dict[str, list[int]]] = {}
         for config in self.analyzer_config.hourly_analytics:
             # if it was a predefined analytics
             if config.name in [
@@ -225,7 +202,7 @@ class Heatmaps:
                     activity=config.type.value,
                     activity_name=activity_name,
                     activity_direction=config.direction.value,
-                    author_id=author_id,
+                    user_ids=user_ids,
                     resource_filtering={
                         f"metadata.{self.analyzer_config.resource_identifier}": resource,
                         "metadata.bot_activity": False,
@@ -251,7 +228,7 @@ class Heatmaps:
                     activity=config.type.value,
                     activity_name=activity_name,
                     activity_direction=config.direction.value,
-                    author_id=author_id,
+                    user_ids=user_ids,
                     resource_filtering={
                         f"metadata.{self.analyzer_config.resource_identifier}": resource,
                         "metadata.bot_activity": False,
@@ -266,10 +243,10 @@ class Heatmaps:
         self,
         day: date,
         resource: str,
-        author_id: str | int,
-    ) -> dict[str, list[dict]]:
+        user_ids: list[str | int],
+    ) -> dict[str, dict[str, list[RawAnalyticsItem]]]:
         analytics_raw = AnalyticsRaw(self.platform_id)
-        analytics: dict[str, list[dict]] = {}
+        analytics: dict[str, dict[str, list[RawAnalyticsItem]]] = {}
 
         for config in self.analyzer_config.raw_analytics:
             # default analytics that we always can have
@@ -304,13 +281,13 @@ class Heatmaps:
                 activity=config.type.value,
                 activity_name=activity_name,
                 activity_direction=config.direction.value,
-                author_id=author_id,
+                user_ids=user_ids,
                 additional_filters=additional_filters,
             )
 
             # converting to dict data
             # so we could later save easily in db
-            analytics[config.name] = [item.to_dict() for item in analytics_items]
+            analytics[config.name] = analytics_items
 
         return analytics
 
@@ -321,3 +298,109 @@ class Heatmaps:
         iteration_count = (datetime.now() - analytics_date).days
 
         return iteration_count
+
+    async def _init_heatmaps_documents(
+        self,
+        hourly_analytics: dict[str, dict[str, list[str | dict]]],
+        raw_analytics: dict[str, dict[str, dict[str, list[RawAnalyticsItem]]]],
+        resource_id: str,
+        user_ids: list[str],
+        bot_ids: list[str],
+        date: datetime,
+    ) -> list[dict[str, Any]]:
+        """
+        initialize the heatmaps documents from the given results on given analytics
+
+        Parameters
+        -----------
+        hourly_analytics : dict[str, dict[str, list[str | dict]]]
+            analytics data with schema as
+            ```
+            {
+                "analytics1": {
+                    "user1": [0, 0, 0, 0],
+                    "user2": [0, 0, 0, 0],
+                    "user3": [0, 0, 0, 0],
+                },
+                "analytics2": {
+                    "user1": [0, 0, 0, 0],
+                    "user2": [0, 0, 0, 0],
+                    "user3": [0, 0, 0, 0],
+                },
+                "analytics3": {
+                    "user1": [0, 0, 0, 0],
+                    "user2": [0, 0, 0, 0],
+                    "user3": [0, 0, 0, 0],
+                },
+                .
+                .
+                .
+            }
+            ```
+        raw_analytics : dict[str, dict[str, list[RawAnalyticsItem]]]
+            analytics data with schema as
+            ```
+            {
+                "analytics1": {
+                    "user1": {'account': 'user2', 'count': 2},
+                    "user2": {'account': 'user7', 'count': 3},
+                    "user3": {'account': 'user4', 'count': 6},
+                },
+                "analytics2": {
+                    "user1": {'account': 'user3', 'count': 3},
+                    "user2": {'account': 'user1', 'count': 4},
+                    "user3": {'account': 'user9', 'count': 7},
+                },
+                "analytics3": {
+                    "user1": [0, 0, 0, 0],
+                    "user2": [0, 0, 0, 0],
+                    "user3": [0, 0, 0, 0],
+                },
+                .
+                .
+                .
+            }
+            ```
+        resource_id : str
+            the resource id to put in list
+        user_ids : list[str]
+            a list of users to include analytics for it
+        date : datetime
+            the date of analytics
+
+        Returns
+        ---------
+        heatmaps_docs : list[dict[str, Any]]
+            a list of heatmaps data
+        """
+        # the dict with users in first dim and analytics second dim
+        restructured_dict = {}
+
+        for analytics_name, users_dict in hourly_analytics.items():
+            for user in user_ids:
+                restructured_dict.setdefault(user, {})
+                restructured_dict[user][analytics_name] = users_dict.get(user, [0] * 24)
+
+        # raw analytics data have a different format
+        for analytics_name, users_dict in raw_analytics.items():
+            for user in user_ids:
+                restructured_dict.setdefault(user, {})
+                restructured_dict[user][analytics_name] = [
+                    item.to_dict() for item in users_dict.get(user, [])
+                ]
+
+        heatmaps_docs = []
+        for user_id, analytics_dict in restructured_dict.items():
+            if user_id in bot_ids:
+                continue
+
+            document = {
+                self.analyzer_config.resource_identifier: resource_id,
+                "date": datetime(date.year, date.month, date.day),
+                "user": user_id,
+                **analytics_dict,
+            }
+
+            heatmaps_docs.append(document)
+
+        return heatmaps_docs

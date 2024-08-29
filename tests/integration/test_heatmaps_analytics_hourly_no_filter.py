@@ -37,7 +37,7 @@ class TestHeatmapsAnalyticsBaseNoFilter(IsolatedAsyncioTestCase):
         hourly_analytics = await self.raw_data_model.get_hourly_analytics(
             day=datetime(2023, 1, 1).date(),
             activity="interactions",
-            author_id=9000,
+            user_ids=[9000],
         )
 
         # mentioning 2 people at hour 0
@@ -67,9 +67,9 @@ class TestHeatmapsAnalyticsBaseNoFilter(IsolatedAsyncioTestCase):
             0,
             0,
         ]
-        self.assertIsInstance(hourly_analytics, list)
-        self.assertEqual(len(hourly_analytics), 24)
-        self.assertEqual(hourly_analytics, expected_analytics)
+        self.assertIsInstance(hourly_analytics, dict)
+        self.assertEqual(len(hourly_analytics[9000]), 24)
+        self.assertEqual(hourly_analytics[9000], expected_analytics)
 
     async def test_get_hourly_analytics_multiple_date(self):
         sample_raw_data = [
@@ -108,7 +108,7 @@ class TestHeatmapsAnalyticsBaseNoFilter(IsolatedAsyncioTestCase):
         hourly_analytics = await self.raw_data_model.get_hourly_analytics(
             day=datetime(2023, 1, 1).date(),
             activity="interactions",
-            author_id=9000,
+            user_ids=[9000],
         )
 
         expected_analytics = [
@@ -137,9 +137,9 @@ class TestHeatmapsAnalyticsBaseNoFilter(IsolatedAsyncioTestCase):
             0,
             0,
         ]
-        self.assertIsInstance(hourly_analytics, list)
-        self.assertEqual(len(hourly_analytics), 24)
-        self.assertEqual(hourly_analytics, expected_analytics)
+        self.assertIsInstance(hourly_analytics, dict)
+        self.assertEqual(len(hourly_analytics[9000]), 24)
+        self.assertEqual(hourly_analytics[9000], expected_analytics)
 
     async def test_get_hourly_analytics_multiple_date_multiple_authors(self):
         sample_raw_data = [
@@ -192,7 +192,7 @@ class TestHeatmapsAnalyticsBaseNoFilter(IsolatedAsyncioTestCase):
         hourly_analytics = await self.raw_data_model.get_hourly_analytics(
             day=datetime(2023, 1, 1).date(),
             activity="interactions",
-            author_id=9000,
+            user_ids=[9000],
         )
 
         expected_analytics = [
@@ -221,9 +221,9 @@ class TestHeatmapsAnalyticsBaseNoFilter(IsolatedAsyncioTestCase):
             0,
             0,
         ]
-        self.assertIsInstance(hourly_analytics, list)
-        self.assertEqual(len(hourly_analytics), 24)
-        self.assertEqual(hourly_analytics, expected_analytics)
+        self.assertIsInstance(hourly_analytics, dict)
+        self.assertEqual(len(hourly_analytics[9000]), 24)
+        self.assertEqual(hourly_analytics[9000], expected_analytics)
 
     async def test_get_hourly_analytics_multiple_date_multiple_data(self):
         sample_raw_data = [
@@ -276,7 +276,7 @@ class TestHeatmapsAnalyticsBaseNoFilter(IsolatedAsyncioTestCase):
         hourly_analytics = await self.raw_data_model.get_hourly_analytics(
             day=datetime(2023, 1, 2).date(),
             activity="interactions",
-            author_id=9001,
+            user_ids=[9001],
         )
 
         expected_analytics = [
@@ -305,6 +305,6 @@ class TestHeatmapsAnalyticsBaseNoFilter(IsolatedAsyncioTestCase):
             0,
             0,
         ]
-        self.assertIsInstance(hourly_analytics, list)
-        self.assertEqual(len(hourly_analytics), 24)
-        self.assertEqual(hourly_analytics, expected_analytics)
+        self.assertIsInstance(hourly_analytics, dict)
+        self.assertEqual(len(hourly_analytics[9001]), 24)
+        self.assertEqual(hourly_analytics[9001], expected_analytics)

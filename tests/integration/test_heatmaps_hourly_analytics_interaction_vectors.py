@@ -25,14 +25,13 @@ class TestHeatmapsRawAnalyticsVectorsInteractions(IsolatedAsyncioTestCase):
             day,
             activity="interactions",
             activity_name="reply",
-            author_id=9000,
+            user_ids=[9000],
             activity_direction="emitter",
             additional_filters={"metadata.channel_id": 123},
         )
 
-        self.assertIsInstance(activity_vector, list)
-        self.assertEqual(len(activity_vector), 24)
-        self.assertEqual(sum(activity_vector), 0)
+        self.assertIsInstance(activity_vector, dict)
+        self.assertEqual(activity_vector, {})
 
     async def test_no_relevant_data(self):
         day = datetime(2023, 1, 1)
@@ -75,14 +74,14 @@ class TestHeatmapsRawAnalyticsVectorsInteractions(IsolatedAsyncioTestCase):
             day,
             activity="interactions",
             activity_name="reply",
-            author_id=9000,
+            user_ids=[9000],
             activity_direction="emitter",
             additional_filters={"metadata.channel_id": 2000},
         )
 
-        self.assertIsInstance(activity_vector, list)
-        self.assertEqual(len(activity_vector), 24)
-        self.assertEqual(sum(activity_vector), 0)
+        self.assertIsInstance(activity_vector, dict)
+        # no activity for user 9000
+        self.assertEqual(activity_vector, {})
 
     async def test_single_relevant_data_type_receiver(self):
         day = datetime(2023, 1, 1)
@@ -155,15 +154,15 @@ class TestHeatmapsRawAnalyticsVectorsInteractions(IsolatedAsyncioTestCase):
             day,
             activity="interactions",
             activity_name="reply",
-            author_id=9000,
+            user_ids=[9000],
             activity_direction="receiver",
             additional_filters={"metadata.channel_id": 2000},
         )
 
-        self.assertIsInstance(activity_vector, list)
-        self.assertEqual(len(activity_vector), 24)
+        self.assertIsInstance(activity_vector, dict)
+        self.assertEqual(len(activity_vector[9000]), 24)
         self.assertEqual(
-            activity_vector,
+            activity_vector[9000],
             [
                 0,
                 0,
@@ -233,17 +232,17 @@ class TestHeatmapsRawAnalyticsVectorsInteractions(IsolatedAsyncioTestCase):
             day,
             activity="interactions",
             activity_name="reply",
-            author_id=9000,
+            user_ids=[9000],
             activity_direction="emitter",
             additional_filters={
                 "metadata.channel_id": 2000,
             },
         )
 
-        self.assertIsInstance(activity_vector, list)
-        self.assertEqual(len(activity_vector), 24)
+        self.assertIsInstance(activity_vector, dict)
+        self.assertEqual(len(activity_vector[9000]), 24)
         self.assertEqual(
-            activity_vector,
+            activity_vector[9000],
             [
                 0,
                 0,
@@ -312,17 +311,18 @@ class TestHeatmapsRawAnalyticsVectorsInteractions(IsolatedAsyncioTestCase):
 
         activity_vector = await self.analytics.analyze(
             day,
-            author_id=9001,
+            user_ids=[9001],
             activity="interactions",
             activity_name="reply",
             activity_direction="emitter",
             additional_filters={"metadata.channel_id": 2000},
         )
 
-        self.assertIsInstance(activity_vector, list)
-        self.assertEqual(len(activity_vector), 24)
+        self.assertIsInstance(activity_vector, dict)
+        self.assertEqual(list(activity_vector.keys()), [9001])
+        self.assertEqual(len(activity_vector[9001]), 24)
         self.assertEqual(
-            activity_vector,
+            activity_vector[9001],
             [
                 0,
                 0,
@@ -359,7 +359,7 @@ class TestHeatmapsRawAnalyticsVectorsInteractions(IsolatedAsyncioTestCase):
                 activity="interactions",
                 activity_name="reply",
                 day=day,
-                author_id=9000,
+                user_ids=[9000],
                 activity_direction="wrong_type",
             )
 
@@ -371,6 +371,6 @@ class TestHeatmapsRawAnalyticsVectorsInteractions(IsolatedAsyncioTestCase):
                 activity="activity1",
                 activity_name="reply",
                 day=day,
-                author_id=9000,
+                user_ids=[9000],
                 activity_direction="emitter",
             )

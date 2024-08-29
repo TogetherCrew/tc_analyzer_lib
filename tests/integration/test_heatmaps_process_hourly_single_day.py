@@ -35,43 +35,45 @@ class TestHeatmapsProcessHourlySingleDay(IsolatedAsyncioTestCase):
             self.heatmaps._process_hourly_analytics(
                 day,
                 resource="124",
-                author_id=9001,
+                user_ids=[9001],
             )
         )
-
+        print(hourly_analytics)
         self.assertIsInstance(hourly_analytics, dict)
         # the config was discord analyzer
+
         self.assertIn("replied", hourly_analytics.keys())
-        self.assertIsInstance(hourly_analytics["replied"], list)
-        self.assertEqual(len(hourly_analytics["replied"]), 24)
+        self.assertIsInstance(hourly_analytics["replied"], dict)
+        # no users interacting so all empty dictionaries
+        self.assertEqual(hourly_analytics["replied"], {})
 
         self.assertIn("replier", hourly_analytics.keys())
-        self.assertIsInstance(hourly_analytics["replier"], list)
-        self.assertEqual(len(hourly_analytics["replier"]), 24)
+        self.assertIsInstance(hourly_analytics["replier"], dict)
+        self.assertEqual(hourly_analytics["replier"], {})
 
         self.assertIn("mentioned", hourly_analytics.keys())
-        self.assertIsInstance(hourly_analytics["mentioned"], list)
-        self.assertEqual(len(hourly_analytics["mentioned"]), 24)
+        self.assertIsInstance(hourly_analytics["mentioned"], dict)
+        self.assertEqual(hourly_analytics["mentioned"], {})
 
         self.assertIn("mentioner", hourly_analytics.keys())
-        self.assertIsInstance(hourly_analytics["mentioner"], list)
-        self.assertEqual(len(hourly_analytics["mentioner"]), 24)
+        self.assertIsInstance(hourly_analytics["mentioner"], dict)
+        self.assertEqual(hourly_analytics["mentioner"], {})
 
         self.assertIn("reacter", hourly_analytics.keys())
-        self.assertIsInstance(hourly_analytics["reacter"], list)
-        self.assertEqual(len(hourly_analytics["reacter"]), 24)
+        self.assertIsInstance(hourly_analytics["reacter"], dict)
+        self.assertEqual(hourly_analytics["reacter"], {})
 
         self.assertIn("reacted", hourly_analytics.keys())
-        self.assertIsInstance(hourly_analytics["reacted"], list)
-        self.assertEqual(len(hourly_analytics["reacted"]), 24)
+        self.assertIsInstance(hourly_analytics["reacted"], dict)
+        self.assertEqual(hourly_analytics["reacted"], {})
 
         self.assertIn("thr_messages", hourly_analytics.keys())
-        self.assertIsInstance(hourly_analytics["thr_messages"], list)
-        self.assertEqual(len(hourly_analytics["thr_messages"]), 24)
+        self.assertIsInstance(hourly_analytics["thr_messages"], dict)
+        self.assertEqual(hourly_analytics["thr_messages"], {})
 
         self.assertIn("lone_messages", hourly_analytics.keys())
-        self.assertIsInstance(hourly_analytics["lone_messages"], list)
-        self.assertEqual(len(hourly_analytics["lone_messages"]), 24)
+        self.assertIsInstance(hourly_analytics["lone_messages"], dict)
+        self.assertEqual(hourly_analytics["lone_messages"], {})
 
     def test_process_hourly_single_author(self):
         platform_id = self.heatmaps.platform_id
@@ -163,29 +165,29 @@ class TestHeatmapsProcessHourlySingleDay(IsolatedAsyncioTestCase):
             self.heatmaps._process_hourly_analytics(
                 day,
                 resource="124",
-                author_id=9001,
+                user_ids=[9001],
             )
         )
 
-        self.assertEqual(hourly_analytics["mentioner"][0], 2)
-        self.assertEqual(hourly_analytics["mentioner"][4], 2)
-        self.assertEqual(sum(hourly_analytics["mentioner"]), 4)
+        self.assertEqual(hourly_analytics["mentioner"][9001][0], 2)
+        self.assertEqual(hourly_analytics["mentioner"][9001][4], 2)
+        self.assertEqual(sum(hourly_analytics["mentioner"][9001]), 4)
         self.assertEqual(sum(hourly_analytics["mentioned"]), 0)
         self.assertEqual(sum(hourly_analytics["reacter"]), 0)
         self.assertEqual(sum(hourly_analytics["reacted"]), 0)
 
-        self.assertEqual(hourly_analytics["replied"][2], 1)
-        self.assertEqual(sum(hourly_analytics["replied"]), 1)
+        self.assertEqual(hourly_analytics["replied"][9001][2], 1)
+        self.assertEqual(sum(hourly_analytics["replied"][9001]), 1)
 
-        self.assertEqual(hourly_analytics["replier"][2], 1)
-        self.assertEqual(sum(hourly_analytics["replier"]), 1)
+        self.assertEqual(hourly_analytics["replier"][9001][2], 1)
+        self.assertEqual(sum(hourly_analytics["replier"][9001]), 1)
 
-        self.assertEqual(hourly_analytics["thr_messages"][0], 1)
-        self.assertEqual(hourly_analytics["thr_messages"][2], 2)
-        self.assertEqual(sum(hourly_analytics["thr_messages"]), 3)
+        self.assertEqual(hourly_analytics["thr_messages"][9001][0], 1)
+        self.assertEqual(hourly_analytics["thr_messages"][9001][2], 2)
+        self.assertEqual(sum(hourly_analytics["thr_messages"][9001]), 3)
 
-        self.assertEqual(hourly_analytics["lone_messages"][4], 1)
-        self.assertEqual(sum(hourly_analytics["lone_messages"]), 1)
+        self.assertEqual(hourly_analytics["lone_messages"][9001][4], 1)
+        self.assertEqual(sum(hourly_analytics["lone_messages"][9001]), 1)
 
     def test_process_hourly_wrong_channel(self):
         """
@@ -280,9 +282,10 @@ class TestHeatmapsProcessHourlySingleDay(IsolatedAsyncioTestCase):
             self.heatmaps._process_hourly_analytics(
                 day,
                 resource="125",
-                author_id=9001,
+                user_ids=[9001],
             )
         )
+        print(hourly_analytics)
 
         self.assertEqual(sum(hourly_analytics["mentioned"]), 0)
         self.assertEqual(sum(hourly_analytics["mentioner"]), 0)
@@ -382,7 +385,7 @@ class TestHeatmapsProcessHourlySingleDay(IsolatedAsyncioTestCase):
             self.heatmaps._process_hourly_analytics(
                 day,
                 resource="124",
-                author_id=9005,
+                user_ids=[9005],
             )
         )
 

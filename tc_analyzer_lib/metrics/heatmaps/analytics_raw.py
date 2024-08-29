@@ -1,6 +1,4 @@
-import logging
 from datetime import date, datetime, time, timedelta
-from typing import Any
 
 from tc_analyzer_lib.schemas import RawAnalyticsItem
 from tc_analyzer_lib.utils.mongo import MongoSingleton
@@ -19,9 +17,9 @@ class AnalyticsRaw:
         activity: str,
         activity_name: str,
         activity_direction: str,
-        author_id: int,
+        user_ids: list[str | int],
         **kwargs,
-    ) -> list[RawAnalyticsItem]:
+    ) -> dict[str, list[RawAnalyticsItem]]:
         """
         analyze the count of messages
 
@@ -35,8 +33,8 @@ class AnalyticsRaw:
             the activity name to be used from `rawmemberactivities` data
             could be `reply`, `mention`, `message`, `commit` or any other
             thing that is available on `rawmemberactivities` data
-        author_id : str
-            the author to filter data for
+        user_ids : str
+            Users to compute analytics for
         activity_direction : str
             should be always either `emitter` or `receiver`
         **kwargs :
@@ -46,7 +44,7 @@ class AnalyticsRaw:
 
         Returns
         ---------
-        activity_count : RawAnalyticsItem
+        activity_count : dict[str, list[RawAnalyticsItem]]
             raw analytics item which holds the user and
             the count of interaction in that day
         """
@@ -66,7 +64,7 @@ class AnalyticsRaw:
         activity_count = await self.get_analytics_count(
             day=day,
             activity=activity,
-            author_id=author_id,
+            user_ids=user_ids,
             activity_name=activity_name,
             activity_direction=activity_direction,
             filters=kwargs.get("additional_filters", {}),
@@ -79,10 +77,10 @@ class AnalyticsRaw:
         day: date,
         activity: str,
         activity_name: str,
-        author_id: str | int,
+        user_ids: list[str | int],
         activity_direction: str,
         **kwargs,
-    ) -> list[RawAnalyticsItem]:
+    ) -> dict[str, list[RawAnalyticsItem]]:
         """
         Gets the list of documents for the stated day
 
@@ -95,8 +93,8 @@ class AnalyticsRaw:
         activity_name : str
             the activity name to do filtering
             could be `reply`, `reaction`, `mention, or ...
-        author_id : str | int
-            the author to do analytics on its data
+        user_ids : list[str | int]
+            Users to compute analytics on their raw data
         activity_direction : str
             the direction of activity
             could be `emitter` or `receiver`
@@ -108,8 +106,8 @@ class AnalyticsRaw:
 
         Returns
         ---------
-        activity_count : list[RawAnalyticsItem]
-            raw analytics item which holds the user and
+        activity_count : dict[str, list[RawAnalyticsItem]]
+            raw analytics item which holds the users as key and
             the count of interaction in that day
         """
         start_day = datetime.combine(day, time(0, 0, 0))
@@ -119,7 +117,7 @@ class AnalyticsRaw:
             {
                 "$match": {
                     "date": {"$gte": start_day, "$lt": end_day},
-                    "author_id": author_id,
+                    "author_id": {"$in": user_ids},
                     **kwargs.get("filters", {}),
                 }
             },
@@ -131,46 +129,38 @@ class AnalyticsRaw:
                 }
             },
             {"$unwind": f"${activity}.users_engaged_id"},
-            {"$group": {"_id": f"${activity}.users_engaged_id", "count": {"$sum": 1}}},
-            {"$match": {"_id": {"$ne": author_id}}},
+            {
+                "$match": {
+                    "$expr": {"$ne": ["$interactions.users_engaged_id", "$author_id"]}
+                }
+            },
+            {
+                "$group": {
+                    "_id": {
+                        "engaged_user": "$interactions.users_engaged_id",
+                        "author_id": "$author_id",
+                    },
+                    "count": {"$sum": 1},
+                }
+            },
         ]
 
         results = await self.get_aggregate_results(pipeline)
-        return self._prepare_raw_analytics_item(author_id, results)
-
-    async def get_aggregate_results(self, pipeline):
-        results = []
-        async for doc in self.collection.aggregate(pipeline):
-            results.append(doc)
         return results
 
-    def _prepare_raw_analytics_item(
-        self,
-        author_id: str | int,
-        activities_data: list[dict[str, str | int]],
-    ) -> list[RawAnalyticsItem]:
-        """
-        post process the database results
+    async def get_aggregate_results(
+        self, pipeline
+    ) -> dict[str, list[RawAnalyticsItem]]:
+        results: dict[str, list[RawAnalyticsItem]] = {}
+        async for doc in self.collection.aggregate(pipeline):
+            user = doc["_id"]["author_id"]
+            results.setdefault(user, [])
 
-        this will take the format `[{'_id': 9000, 'count': 4}]` and output a RawAnalyticsItem
+            engaged_user = doc["_id"]["engaged_user"]
+            engagement_count = doc["count"]
 
-        Parameters
-        ------------
-        author_id : str
-            just for skipping self-interactions
-        activities_data : dict[str, str | int]
-            the user interaction count.
-            the data will be as an example `[{'_id': 9000, 'count': 4}]`
-            _id would be the users interacting with
+            results[user].append(
+                RawAnalyticsItem(account=engaged_user, count=engagement_count)
+            )
 
-        Returns
-        --------
-        raw_analytics : list[RawAnalyticsItem]
-            the data in format of raw analytics item
-        """
-        analytics = [
-            RawAnalyticsItem(account=data["_id"], count=data["count"])
-            for data in activities_data
-            if data["_id"] != author_id
-        ]
-        return analytics
+        return results

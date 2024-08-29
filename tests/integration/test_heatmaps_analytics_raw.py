@@ -44,14 +44,13 @@ class TestHeatmapsRawAnalytics(IsolatedAsyncioTestCase):
             activity="interactions",
             activity_name="reply",
             activity_direction=ActivityDirection.RECEIVER.value,
-            author_id=9000,
+            user_ids=[9000],
         )
 
-        self.assertIsInstance(analytics_result, list)
-        self.assertEqual(len(analytics_result), 1)
-        self.assertIsInstance(analytics_result[0], RawAnalyticsItem)
-        self.assertEqual(analytics_result[0].account, 9003)
-        self.assertEqual(analytics_result[0].count, 1)
+        self.assertIsInstance(analytics_result, dict)
+        self.assertEqual(list(analytics_result.keys()), [9000])
+        self.assertEqual(analytics_result[9000][0].account, 9003)
+        self.assertEqual(analytics_result[9000][0].count, 1)
 
     async def test_raw_analytics_wrong_user(self):
         """
@@ -86,10 +85,10 @@ class TestHeatmapsRawAnalytics(IsolatedAsyncioTestCase):
             activity="interactions",
             activity_name="reply",
             activity_direction=ActivityDirection.RECEIVER.value,
-            author_id=9003,
+            user_ids=[9003],
         )
 
-        self.assertEqual(analytics_result, [])
+        self.assertEqual(analytics_result, {})
 
     async def test_raw_analytics_wrong_activity_direction(self):
         """
@@ -124,10 +123,10 @@ class TestHeatmapsRawAnalytics(IsolatedAsyncioTestCase):
             activity="interactions",
             activity_name="reply",
             activity_direction=ActivityDirection.EMITTER.value,
-            author_id=9000,
+            user_ids=[9000],
         )
 
-        self.assertEqual(analytics_result, [])
+        self.assertEqual(analytics_result, {})
 
     async def test_raw_analytics_wrong_day(self):
         """
@@ -162,9 +161,9 @@ class TestHeatmapsRawAnalytics(IsolatedAsyncioTestCase):
             activity="interactions",
             activity_name="reply",
             activity_direction=ActivityDirection.RECEIVER.value,
-            author_id=9000,
+            user_ids=[9000],
         )
-        self.assertEqual(analytics_result, [])
+        self.assertEqual(analytics_result, {})
 
     async def test_raw_analytics_wrong_activity(self):
         """
@@ -199,10 +198,10 @@ class TestHeatmapsRawAnalytics(IsolatedAsyncioTestCase):
             activity="interactions",
             activity_name="mention",
             activity_direction=ActivityDirection.RECEIVER.value,
-            author_id=9000,
+            user_ids=[9000],
         )
 
-        self.assertEqual(analytics_result, [])
+        self.assertEqual(analytics_result, {})
 
     async def test_raw_analytics_multiple_users(self):
         """
@@ -267,13 +266,13 @@ class TestHeatmapsRawAnalytics(IsolatedAsyncioTestCase):
             activity="interactions",
             activity_name="reply",
             activity_direction=ActivityDirection.RECEIVER.value,
-            author_id=9000,
+            user_ids=[9000, 9005, 9006],
         )
+        self.assertIsInstance(analytics_result, dict)
+        self.assertEqual(len(analytics_result.keys()), 1)
 
-        self.assertIsInstance(analytics_result, list)
-        self.assertEqual(len(analytics_result), 2)
-
-        for analytics in analytics_result:
+        # just the user with id 9000 was interacting
+        for analytics in analytics_result[9000]:
             self.assertIsInstance(analytics, RawAnalyticsItem)
             if analytics.account == 9006:
                 self.assertEqual(analytics.count, 1)

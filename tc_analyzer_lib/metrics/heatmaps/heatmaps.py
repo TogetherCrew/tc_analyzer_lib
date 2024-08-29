@@ -71,6 +71,12 @@ class Heatmaps:
         else:
             analytics_date = last_date + timedelta(days=1)
 
+        # in order to skip bots
+        bot_ids = []
+        bot_cursor = await self.utils.get_users(is_bot=True)
+        async for bot in bot_cursor:
+            bot_ids.append(bot["id"])
+
         # initialize the data array
         heatmaps_results = []
 
@@ -127,11 +133,12 @@ class Heatmaps:
                     resource=resource_id,
                     user_ids=user_ids,
                 )
-                heatmaps_doc = self._init_heatmaps_documents(
+                heatmaps_doc = await self._init_heatmaps_documents(
                     hourly_analytics=hourly_analytics,
                     raw_analytics=raw_analytics,
                     resource_id=resource_id,
                     user_ids=user_ids,
+                    bot_ids=bot_ids,
                     date=start_day,
                 )
                 heatmaps_results.extend(heatmaps_doc)
@@ -292,12 +299,13 @@ class Heatmaps:
 
         return iteration_count
 
-    def _init_heatmaps_documents(
+    async def _init_heatmaps_documents(
         self,
         hourly_analytics: dict[str, dict[str, list[str | dict]]],
         raw_analytics: dict[str, dict[str, dict[str, list[RawAnalyticsItem]]]],
         resource_id: str,
         user_ids: list[str],
+        bot_ids: list[str],
         date: datetime,
     ) -> list[dict[str, Any]]:
         """
@@ -377,13 +385,15 @@ class Heatmaps:
         for analytics_name, users_dict in raw_analytics.items():
             for user in user_ids:
                 restructured_dict.setdefault(user, {})
-                print(users_dict.get(user, []))
                 restructured_dict[user][analytics_name] = [
                     item.to_dict() for item in users_dict.get(user, [])
                 ]
 
         heatmaps_docs = []
         for user_id, analytics_dict in restructured_dict.items():
+            if user_id in bot_ids:
+                continue
+
             document = {
                 self.analyzer_config.resource_identifier: resource_id,
                 "date": datetime(date.year, date.month, date.day),

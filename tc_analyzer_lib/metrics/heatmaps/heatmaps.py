@@ -107,6 +107,7 @@ class Heatmaps:
                     f"{start_day.date()} - {end_day.date()}"
                 )
 
+
             for _, resource_id in enumerate(period_resources):
                 user_ids = await self.utils.get_active_users(
                     start_day,
@@ -122,6 +123,7 @@ class Heatmaps:
                         f"{start_day.date()} - {end_day.date()} for resource: {resource_id}"
                         " Skipping the day."
                     )
+                    continue
 
                 hourly_analytics = await self._process_hourly_analytics(
                     day=analytics_date,

@@ -109,7 +109,6 @@ class Heatmaps:
                     f"{start_day.date()} - {end_day.date()}"
                 )
 
-
             for _, resource_id in enumerate(period_resources):
                 user_ids = await self.utils.get_active_users(
                     start_day,

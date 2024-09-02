@@ -81,13 +81,15 @@ class Heatmaps:
         heatmaps_results = []
 
         index = 0
+        max_index = (analytics_date - datetime.now()).days
         while analytics_date.date() < datetime.now().date():
             start_day = analytics_date.replace(
                 hour=0, minute=0, second=0, microsecond=0
             )
             end_day = start_day + timedelta(days=1)
             logging.info(
-                f"{log_prefix} ANALYZING HEATMAPS {start_day.date()} - {end_day.date()}! | index: {index}"
+                f"{log_prefix} ANALYZING HEATMAPS {start_day.date()} - {end_day.date()}!"
+                f" | iteration: {index + 1} / {max_index}"
             )
 
             # getting the active resource_ids (activities being done there by users)

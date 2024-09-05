@@ -81,7 +81,7 @@ class Heatmaps:
         heatmaps_results = []
 
         index = 0
-        max_index = (analytics_date - datetime.now()).days
+        max_index = (datetime.now() - analytics_date).days
         while analytics_date.date() < datetime.now().date():
             start_day = analytics_date.replace(
                 hour=0, minute=0, second=0, microsecond=0

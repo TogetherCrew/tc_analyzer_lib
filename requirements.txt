@@ -18,7 +18,7 @@ tc-messageBroker==1.6.7
 sentry-sdk
 rq
 redis
-tc-neo4j-lib==2.0.1
+tc-neo4j-lib==2.0.3
 pybars3
 backoff==2.2.1
 motor==3.5.1

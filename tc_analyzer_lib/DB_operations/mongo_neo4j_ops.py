@@ -90,12 +90,17 @@ class MongoNeo4jDB:
                     platform_id=platform_id,
                     queries_list=queries_list,
                     remove_memberactivities=remove_memberactivities,
+                    graph_schema=graph_schema,
                 )
         else:
             logging.warning("Testing mode enabled! Not saving any data")
 
     def run_operations_transaction(
-        self, platform_id: str, queries_list: list[Query], remove_memberactivities: bool
+        self,
+        platform_id: str,
+        queries_list: list[Query],
+        remove_memberactivities: bool,
+        graph_schema: GraphSchema,
     ) -> None:
         """
         do the deletion and insertion operations inside a transaction
@@ -119,7 +124,8 @@ class MongoNeo4jDB:
                 f"{self.guild_msg} Neo4J platform_id accounts relation will be removed!"
             )
             delete_relationship_query = self._create_guild_rel_deletion_query(
-                platform_id=platform_id
+                platform_id=platform_id,
+                graph_schema=graph_schema,
             )
             transaction_queries.append(delete_relationship_query)
 
@@ -128,7 +134,10 @@ class MongoNeo4jDB:
         self.neo4j_ops.run_queries_in_batch(transaction_queries, message=self.guild_msg)
 
     def _create_guild_rel_deletion_query(
-        self, platform_id: str, relation_name: str = "INTERACTED_WITH"
+        self,
+        platform_id: str,
+        graph_schema: GraphSchema,
+        relation_name: str = "INTERACTED_WITH",
     ) -> Query:
         """
         create a query to delete the relationships
@@ -148,8 +157,8 @@ class MongoNeo4jDB:
         """
         query_str = f"""
           MATCH
-            (:DiscordAccount)
-                -[r:{relation_name} {{platformId: '{platform_id}'}}]-(:DiscordAccount)
+            (:{graph_schema.user_label})
+                -[r:{graph_schema.interacted_with_rel} {{platformId: '{platform_id}'}}]-(:{graph_schema.user_label})
             DETACH DELETE r"""
 
         parameters = {

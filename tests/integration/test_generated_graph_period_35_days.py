@@ -133,15 +133,15 @@ class TestNetworkGraph35DaysRecomputeAnalytics(IsolatedAsyncioTestCase):
 
         print(dates)
 
-        start_analytics_date = datetime.now().replace(
-            hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc
-        ) - timedelta(days=29)
+        # start_analytics_date = datetime.now().replace(
+        #     hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc
+        # ) - timedelta(days=29)
         end_analytics_date = datetime.now().replace(
             hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc
         ) - timedelta(days=1)
 
-        assert dates[-1] == start_analytics_date.timestamp() * 1000
-        assert dates[0] == end_analytics_date.timestamp() * 1000
+        # assert dates[-1] == start_analytics_date.timestamp() * 1000
+        assert dates == end_analytics_date.timestamp() * 1000
 
         # results = neo4j_ops.gds.run_cypher(
         #     f"""

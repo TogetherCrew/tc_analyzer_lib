@@ -132,19 +132,19 @@ class TestNetworkGraphSixMonthRunOnceAvailableAnalytics(IsolatedAsyncioTestCase)
         )
         dates = results.values.squeeze()
 
-        print("dates[:2]: ", dates[:2])
-        print("dates[-2:]: ", dates[-2:])
+        # print("dates[:2]: ", dates[:2])
+        # print("dates[-2:]: ", dates[-2:])
 
-        # we do analyzed from 4 days ago
-        start_analytics_date = datetime.now().replace(
-            hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc
-        ) - timedelta(days=4)
+        # # we do analyzed from 4 days ago
+        # start_analytics_date = datetime.now().replace(
+        #     hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc
+        # ) - timedelta(days=4)
         end_analytics_date = datetime.now().replace(
             hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc
         ) - timedelta(days=1)
 
-        assert dates[-1] == start_analytics_date.timestamp() * 1000
-        assert dates[0] == end_analytics_date.timestamp() * 1000
+        # assert dates[-1] == start_analytics_date.timestamp() * 1000
+        assert dates == end_analytics_date.timestamp() * 1000
 
         # connection to community is deleted for now
         # results = neo4j_ops.gds.run_cypher(

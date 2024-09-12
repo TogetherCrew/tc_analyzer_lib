@@ -116,6 +116,7 @@ class TestNetworkGraphOneYearRunOnce(IsolatedAsyncioTestCase):
             rawinfo_samples
         )
 
+        # we've only saved the latest date
         await analyzer.run_once()
 
         graph_schema = analyzer.graph_schema
@@ -130,19 +131,16 @@ class TestNetworkGraphOneYearRunOnce(IsolatedAsyncioTestCase):
         )
         dates = results.values.squeeze()
 
-        print("dates[:2]: ", dates[:2])
-        print("dates[-2:]: ", dates[-2:])
-
-        # our analysis started from 4 days ago
-        start_analytics_date = datetime.now().replace(
-            hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc
-        ) - timedelta(days=4)
+        # # our analysis started from 4 days ago
+        # start_analytics_date = datetime.now().replace(
+        #     hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc
+        # ) - timedelta(days=4)
         end_analytics_date = datetime.now().replace(
             hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc
         ) - timedelta(days=1)
 
-        assert dates[-1] == start_analytics_date.timestamp() * 1000
-        assert dates[0] == end_analytics_date.timestamp() * 1000
+        # assert dates[-1] == start_analytics_date.timestamp() * 1000
+        assert dates == end_analytics_date.timestamp() * 1000
 
         # results = neo4j_ops.gds.run_cypher(
         #     f"""

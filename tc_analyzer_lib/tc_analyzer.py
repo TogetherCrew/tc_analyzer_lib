@@ -112,6 +112,12 @@ class TCAnalyzer(AnalyzerDBManager):
             member_acitivities_networkx_data,
         ) = memberactivity_analysis.analysis_member_activity(from_start=False)
 
+        # just getting the latest networkx object (latest graph)
+        latest_date = max(member_acitivities_networkx_data.keys())
+        member_acitivities_networkx_data = {
+            latest_date: member_acitivities_networkx_data[latest_date]
+        }
+
         analytics_data = {}
         # storing whole data into a dictinoary
         analytics_data["heatmaps"] = None
@@ -192,6 +198,12 @@ class TCAnalyzer(AnalyzerDBManager):
             member_activities_data,
             member_acitivities_networkx_data,
         ) = memberactivity_analysis.analysis_member_activity(from_start=True)
+
+        # just getting the latest networkx object (latest graph)
+        latest_date = max(member_acitivities_networkx_data.keys())
+        member_acitivities_networkx_data = {
+            latest_date: member_acitivities_networkx_data[latest_date]
+        }
 
         # storing whole data into a dictinoary
         analytics_data = {}

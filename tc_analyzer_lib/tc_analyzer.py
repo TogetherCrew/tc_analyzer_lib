@@ -112,11 +112,9 @@ class TCAnalyzer(AnalyzerDBManager):
             member_acitivities_networkx_data,
         ) = memberactivity_analysis.analysis_member_activity(from_start=False)
 
-        # just getting the latest networkx object (latest graph)
-        latest_date = max(member_acitivities_networkx_data.keys())
-        member_acitivities_networkx_data = {
-            latest_date: member_acitivities_networkx_data[latest_date]
-        }
+        member_acitivities_networkx_data = self.get_latest_networkx_graph(
+            member_acitivities_networkx_data
+        )
 
         analytics_data = {}
         # storing whole data into a dictinoary
@@ -199,11 +197,9 @@ class TCAnalyzer(AnalyzerDBManager):
             member_acitivities_networkx_data,
         ) = memberactivity_analysis.analysis_member_activity(from_start=True)
 
-        # just getting the latest networkx object (latest graph)
-        latest_date = max(member_acitivities_networkx_data.keys())
-        member_acitivities_networkx_data = {
-            latest_date: member_acitivities_networkx_data[latest_date]
-        }
+        member_acitivities_networkx_data = self.get_latest_networkx_graph(
+            member_acitivities_networkx_data
+        )
 
         # storing whole data into a dictinoary
         analytics_data = {}
@@ -235,3 +231,10 @@ class TCAnalyzer(AnalyzerDBManager):
             raise ValueError(
                 f"Platform with platform_id: {self.platform_id} doesn't exist!"
             )
+
+    def get_latest_networkx_graph(self, member_acitivities_networkx_data: dict):
+        """
+        just getting the latest networkx object (latest graph)
+        """
+        latest_date = max(member_acitivities_networkx_data.keys())
+        return {latest_date: member_acitivities_networkx_data[latest_date]}

@@ -121,7 +121,7 @@ class NodeStats:
 
         self.save_properties_db(df, date)
         _ = self.gds.run_cypher(
-            "CALL gds.graph.drop($graph_name)",
+            "CALL gds.graph.drop($graph_name) YIELD graphName",
             {
                 "graph_name": graph_name,
             },

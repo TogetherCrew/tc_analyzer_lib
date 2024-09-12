@@ -81,7 +81,7 @@ class LocalClusteringCoeff:
         # dropping the computed date
         _ = self.gds.run_cypher(
             """
-            CALL gds.graph.drop($graph_projected_name)
+            CALL gds.graph.drop($graph_projected_name) YIELD graphName
             """,
             {
                 "graph_projected_name": graph_projected_name,

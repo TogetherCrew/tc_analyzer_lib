@@ -232,9 +232,15 @@ class TCAnalyzer(AnalyzerDBManager):
                 f"Platform with platform_id: {self.platform_id} doesn't exist!"
             )
 
-    def get_latest_networkx_graph(self, member_acitivities_networkx_data: dict):
+    def get_latest_networkx_graph(
+        self, member_acitivities_networkx_data: dict
+    ) -> dict | None:
         """
         just getting the latest networkx object (latest graph)
         """
-        latest_date = max(member_acitivities_networkx_data.keys())
-        return {latest_date: member_acitivities_networkx_data[latest_date]}
+        # if there was any data availabe
+        if member_acitivities_networkx_data.keys():
+            latest_date = max(member_acitivities_networkx_data.keys())
+            return {latest_date: member_acitivities_networkx_data[latest_date]}
+        else:
+            return None

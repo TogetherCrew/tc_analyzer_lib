@@ -83,8 +83,8 @@ def test_neo4j_compute_metrics_from_start():
         """
     )
 
-    # we don't have 1004 interacting on yesterday (1689193800.0)
-    assert len(accounts_result.values) == 9
+    # 5 users interacting today
+    assert len(accounts_result.values) == 5
 
     for _, row in accounts_result.iterrows():
         print(row)
@@ -95,7 +95,7 @@ def test_neo4j_compute_metrics_from_start():
 
         assert userId is not None
 
-        assert date in [yesterday, today]
+        assert date in [today]
         assert bool(np.isnan(lcc)) is False
         assert lcc is not None
 
@@ -114,10 +114,10 @@ def test_neo4j_compute_metrics_from_start():
     )
 
     # for 2 dates
-    assert len(guild_results.values) == 2
+    assert len(guild_results.values) == 1
     for _, row in guild_results.iterrows():
         print(row)
-        assert row["date"] in [yesterday, today]
+        assert row["date"] in [today]
         assert row["platformId"] == platform_id
         assert row["decentralizationScore"] is not None
         assert bool(np.isnan(row["decentralizationScore"])) is False

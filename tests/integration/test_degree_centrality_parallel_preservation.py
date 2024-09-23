@@ -78,17 +78,17 @@ def test_partially_connected_coeffs():
     )
 
     print(degree_centrality)
-    assert degree_centrality[yesterday]["1000"] == 2 / 3
+    # assert degree_centrality[yesterday]["1000"] == 2 / 3
     assert degree_centrality[today]["1000"] == 1 / 2
 
-    assert degree_centrality[yesterday]["1001"] == 1
+    # assert degree_centrality[yesterday]["1001"] == 1
     assert degree_centrality[today]["1001"] == 1
 
-    assert degree_centrality[yesterday]["1002"] == 2 / 3
+    # assert degree_centrality[yesterday]["1002"] == 2 / 3
     assert degree_centrality[today]["1002"] == 3 / 4
 
-    assert degree_centrality[yesterday]["1003"] == 1
+    # assert degree_centrality[yesterday]["1003"] == 1
     assert degree_centrality[today]["1003"] == 1 / 2
 
-    assert "1004" not in degree_centrality[yesterday]
+    # assert "1004" not in degree_centrality[yesterday]
     assert degree_centrality[today]["1004"] == 1 / 4

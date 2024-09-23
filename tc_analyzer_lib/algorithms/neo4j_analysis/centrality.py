@@ -31,6 +31,8 @@ class Centerality:
         the computed_dates will be based on the
         network decentrality metric computations
 
+        NOTE: `from_start` is disabled and we're always computing for the latest date available
+
         Parameters:
         ------------
         direction : str
@@ -68,30 +70,32 @@ class Centerality:
         node = self.graph_schema.user_label
         weighted = True if "weighted" not in kwargs.keys() else kwargs["weighted"]
         normalize = False if "normalize" not in kwargs.keys() else kwargs["normalize"]
-        preserve_parallel = (
-            True
-            if "preserve_parallel" not in kwargs.keys()
-            else kwargs["preserve_parallel"]
-        )
+        preserve_parallel = kwargs.get("preserve_parallel", True)
 
-        recompute_dates = None
-        if "recompute_dates" in kwargs:
-            recompute_dates = kwargs["recompute_dates"]
+        # recompute_dates = None
+        # if "recompute_dates" in kwargs:
+        #     recompute_dates = kwargs["recompute_dates"]
 
         if weighted and not preserve_parallel:
-            logging.warn(
+            logging.warning(
                 """preserver_parallel=False with weighted=True
                 could produce wrong results!"""
             )
 
         interacted_with_label = self.graph_schema.interacted_with_rel
+        query = """
+        MATCH () -[r:INTERACTED_WITH {platformId: $platform_id}]-()
+        WITH max(r.date) as latest_date
+        """
+
         # determining one line of the query useing the direction variable
+        interaction = f"[r:{interacted_with_label} {{date: latest_date}}]"
         if direction == "in_degree":
-            query = f"MATCH (a:{node})<-[r:{interacted_with_label}]-(b:{node})"
+            query += f"MATCH (a:{node})<-{interaction}-(b:{node})"
         elif direction == "out_degree":
-            query = f"MATCH (a:{node})-[r:{interacted_with_label}]->(b:{node})"
+            query += f"MATCH (a:{node})-{interaction}->(b:{node})"
         elif direction == "undirected":
-            query = f"MATCH (a:{node})-[r:{interacted_with_label}]-(b:{node})"
+            query += f"MATCH (a:{node})-{interaction}-(b:{node})"
 
         results = self.neo4j_ops.gds.run_cypher(
             f"""
@@ -107,14 +111,14 @@ class Centerality:
         )
 
         dates_to_compute = set(results["date"].value_counts().index)
-        if not from_start:
-            projection_utils = ProjectionUtils(self.platform_id, self.graph_schema)
+        # if not from_start:
+        #     projection_utils = ProjectionUtils(self.platform_id, self.graph_schema)
 
-            dates_to_compute = self._get_dates_to_compute(
-                projection_utils, dates_to_compute
-            )
-            if recompute_dates is not None:
-                dates_to_compute = dates_to_compute.union(recompute_dates)
+        #     dates_to_compute = self._get_dates_to_compute(
+        #         projection_utils, dates_to_compute
+        #     )
+        #     if recompute_dates is not None:
+        #         dates_to_compute = dates_to_compute.union(recompute_dates)
 
         degree_centerality = self.count_degrees(
             computation_date=dates_to_compute,

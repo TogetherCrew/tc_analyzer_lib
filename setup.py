@@ -6,7 +6,7 @@ with open("requirements.txt") as f:
 
 setup(
     name="tc-analyzer-lib",
-    version="1.4.9",
+    version="1.4.10",
     author="Mohammad Amin Dadgar, TogetherCrew",
     maintainer="Mohammad Amin Dadgar",
     maintainer_email="dadgaramin96@gmail.com",

@@ -88,7 +88,7 @@ def test_guild_results_available():
     for _, row in accounts_result.iterrows():
         print(row)
         assert row["userId"] is not None
-        assert row["date"] in [yesterday, today]
+        assert row["date"] in [today]
         assert bool(np.isnan(row["localClusteringCoefficient"])) is False
 
     guild_results = neo4j_ops.gds.run_cypher(
@@ -102,7 +102,7 @@ def test_guild_results_available():
     )
     for _, row in guild_results.iterrows():
         print(row)
-        assert row["date"] in [yesterday, today]
+        assert row["date"] in [today]
         assert row["platformId"] == platform_id
         assert bool(np.isnan(row["decentralizationScore"])) is False
 
@@ -113,9 +113,9 @@ def test_guild_results_available():
         """
     )
 
-    assert len(results) == 2
+    assert len(results) == 1
     print(results)
-    assert results["date"].iloc[0] in [yesterday, today]
-    assert results["date"].iloc[1] in [yesterday, today]
+    assert results["date"].iloc[0] in [today]
+    # assert results["date"].iloc[1] in [today]
     assert results["modularityScore"].iloc[0] is not None
-    assert results["modularityScore"].iloc[1] is not None
+    # assert results["modularityScore"].iloc[1] is not None

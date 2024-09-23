@@ -35,14 +35,14 @@ class Louvain:
         computable_dates = self.projection_utils.get_dates()
 
         # compute for each date
-        to_compute: set[float]
-        if from_start:
-            to_compute = computable_dates
-        else:
-            computed_dates = self.get_computed_dates()
-            to_compute = computable_dates - computed_dates
+        # to_compute: set[float]
+        # if from_start:
+        #     to_compute = computable_dates
+        # else:
+        #     computed_dates = self.get_computed_dates()
+        #     to_compute = computable_dates - computed_dates
 
-        for date in to_compute:
+        for date in computable_dates:
             try:
                 self.louvain_computation_wrapper(date)
             except Exception as exp:

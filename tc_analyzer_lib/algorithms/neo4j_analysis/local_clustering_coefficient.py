@@ -33,17 +33,17 @@ class LocalClusteringCoeff:
         # Getting all possible dates
         computable_dates = self.projection_utils.get_dates()
 
-        computed_dates = self.get_computed_dates()
+        # computed_dates = self.get_computed_dates()
 
         # compute for each date
-        to_compute: set[float]
-        if from_start:
-            to_compute = computable_dates
-        else:
-            to_compute = computable_dates - computed_dates
+        # to_compute: set[float]
+        # if from_start:
+        #     to_compute = computable_dates
+        # else:
+        #     to_compute = computable_dates - computed_dates
 
         # for the computation date
-        for date in to_compute:
+        for date in computable_dates:
             try:
                 self.local_clustering_computation_wrapper(date=date)
             except Exception as exp:

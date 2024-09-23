@@ -114,6 +114,7 @@ class ProjectionUtils:
     def get_dates(self) -> set[float]:
         """
         get all the dates we do have on the INTERACTED_WITH relations
+        Note: returning just the only previous date
 
         Parameters:
         ------------
@@ -124,8 +125,7 @@ class ProjectionUtils:
             f"""
             MATCH (a:{self.user_label})
                 -[r:{self.between_user_label} {{platformId: $platform_id}}]-()
-            WITH DISTINCT(r.date) as dates
-            RETURN dates
+            RETURN r.date as dates ORDER BY dates DESC LIMIT 1
             """,
             params={"platform_id": self.platform_id},
         )

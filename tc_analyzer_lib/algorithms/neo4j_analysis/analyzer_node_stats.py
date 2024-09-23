@@ -42,13 +42,16 @@ class NodeStats:
         self.projection_utils = ProjectionUtils(self.platform_id, self.graph_schema)
 
     def compute_stats(self, from_start: bool) -> None:
+        """
+        from_start is disabled. We would always compute just for the latest date
+        """
         # possible dates to do the computations
         possible_dates = self.projection_utils.get_dates()
 
         # if we didn't want to compute from the day start
-        if not from_start:
-            computed_dates = self.get_computed_dates()
-            possible_dates = possible_dates - computed_dates
+        # if not from_start:
+        #     computed_dates = self.get_computed_dates()
+        #     possible_dates = possible_dates - computed_dates
 
         for date in possible_dates:
             try:

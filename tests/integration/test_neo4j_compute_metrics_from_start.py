@@ -95,7 +95,7 @@ def test_neo4j_compute_metrics_from_start():
 
         assert userId is not None
 
-        assert date in [yesterday, today]
+        assert date in [today]
         assert bool(np.isnan(lcc)) is False
         assert lcc is not None
 

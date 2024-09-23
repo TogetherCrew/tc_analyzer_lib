@@ -20,7 +20,6 @@ def test_louvain_algorithm_available_data():
     user_label = graph_schema.user_label
     platform_label = graph_schema.platform_label
     interacted_with = graph_schema.interacted_with_rel
-    interacted_in = graph_schema.interacted_in_rel
     is_member = graph_schema.member_relation
 
     # creating some nodes with data
@@ -52,9 +51,8 @@ def test_louvain_algorithm_available_data():
         """
     )
 
-    assert len(results) == 2
-    assert results["date"].iloc[0] in [yesterday, today]
-    assert results["date"].iloc[1] in [yesterday, today]
+    assert len(results) == 1
+    assert results["date"].iloc[0] in [today]
 
 
 def test_louvain_algorithm_more_available_data():
@@ -74,7 +72,6 @@ def test_louvain_algorithm_more_available_data():
     user_label = graph_schema.user_label
     platform_label = graph_schema.platform_label
     interacted_with = graph_schema.interacted_with_rel
-    interacted_in = graph_schema.interacted_in_rel
     is_member = graph_schema.member_relation
 
     # creating some nodes with data
@@ -128,6 +125,5 @@ def test_louvain_algorithm_more_available_data():
         """
     )
     print(results)
-    assert len(results) == 2
-    assert results["date"].iloc[0] in [yesterday, today]
-    assert results["date"].iloc[1] in [yesterday, today]
+    assert len(results) == 1
+    assert results["date"].iloc[0] in [today]

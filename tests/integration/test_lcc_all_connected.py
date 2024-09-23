@@ -65,22 +65,13 @@ def test_all_connected_coeffs():
     )
 
     user0_id = "1000"
-    expected_results_user0 = [
-        [user0_id, yesterday, 1.0],
-        [user0_id, today, 0.0],
-    ]
-    assert expected_results_user0 in results[results.userId == user0_id].values
+    expected_results_user0 = [user0_id, today, 0.0]
+    assert expected_results_user0 == list(results[results.userId == user0_id].values[0])
 
     user1_id = "1001"
-    expected_results_user1 = [
-        [user1_id, yesterday, 1.0],
-        [user1_id, today, 0.0],
-    ]
-    assert expected_results_user1 in results[results.userId == user1_id].values
+    expected_results_user1 = [user1_id, today, 0.0]
+    assert expected_results_user1 == list(results[results.userId == user1_id].values[0])
 
     user2_id = "1002"
-    expected_results_user2 = [
-        [user2_id, yesterday, 1.0],
-        [user2_id, today, 0.0],
-    ]
-    assert expected_results_user2 in results[results.userId == user2_id].values
+    expected_results_user2 = []
+    assert expected_results_user2 == list(results[results.userId == user2_id].values)

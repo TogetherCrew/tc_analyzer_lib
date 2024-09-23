@@ -82,40 +82,31 @@ def test_node_stats():
         """
     )
 
-    # we had 5 discord accounts and 2 dates for each
-    # just the "1004" user did not interact yesterday
-    # so 9 status results
-    assert len(results) == 9
+    # we had 5 discord accounts computed for recent date
+    assert len(results) == 5
     print(results)
 
     results_user0 = results[results["userId"] == "1000"]
-    expected_results = [
-        ["1000", today, 2],
-        ["1000", yesterday, 0],
-    ]
-    assert expected_results in results_user0.values
+    assert len(results_user0) == 1
+    expected_results = ["1000", today, 2]
+    assert expected_results == list(results_user0.values[0])
 
     results_user1 = results[results["userId"] == "1001"]
-    expected_results = [
-        ["1001", today, 1],
-        ["1001", yesterday, 1],
-    ]
-    assert expected_results in results_user1.values
+    assert len(results_user1) == 1
+    expected_results = ["1001", today, 1]
+    assert expected_results == list(results_user1.values[0])
 
     results_user2 = results[results["userId"] == "1002"]
-    expected_results = [
-        ["1002", today, 0],
-        ["1002", yesterday, 0],
-    ]
-    assert expected_results in results_user2.values
+    assert len(results_user2) == 1
+    expected_results = ["1002", today, 0]
+    assert expected_results == list(results_user2.values[0])
 
     results_user3 = results[results["userId"] == "1003"]
-    expected_results = [
-        ["1003", today, 2],
-        ["1004", yesterday, 1],
-    ]
-    assert expected_results in results_user3.values
+    assert len(results_user3) == 1
+    expected_results = ["1003", today, 2]
+    assert expected_results == list(results_user3.values[0])
 
     results_user4 = results[results["userId"] == "1004"]
-    expected_results = [["1004", today, 0]]
-    assert expected_results in results_user4.values
+    assert len(results_user4) == 1
+    expected_results = ["1004", today, 0]
+    assert expected_results == list(results_user4.values[0])

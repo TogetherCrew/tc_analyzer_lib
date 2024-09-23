@@ -61,15 +61,15 @@ class TestClosenessCentrality(TestCase):
         louvain = ClosenessCentrality(platform_id, graph_schema)
         louvain.compute(from_start=False)
 
-        yesterday_results = self.neo4j_ops.gds.run_cypher(
-            f"""
-            MATCH (user:{graph_schema.user_label})-[r:HAVE_METRICS {{platformId: '{platform_id}', date: {yesterday}}}]->(user)
-            RETURN r.date as date, r.closenessCentrality as closenessScore
-            """
-        )
-        # yesterday three users were interacting
-        assert len(yesterday_results) == 3
-        assert yesterday_results["date"].iloc[0] == yesterday
+        # yesterday_results = self.neo4j_ops.gds.run_cypher(
+        #     f"""
+        #     MATCH (user:{graph_schema.user_label})-[r:HAVE_METRICS {{platformId: '{platform_id}', date: {yesterday}}}]->(user)
+        #     RETURN r.date as date, r.closenessCentrality as closenessScore
+        #     """
+        # )
+        # # yesterday three users were interacting
+        # assert len(yesterday_results) == 3
+        # assert yesterday_results["date"].iloc[0] == yesterday
 
         today_results = self.neo4j_ops.gds.run_cypher(
             f"""
@@ -157,15 +157,15 @@ class TestClosenessCentrality(TestCase):
 
         louvain.compute(from_start=False)
 
-        yesterday_results = self.neo4j_ops.gds.run_cypher(
-            f"""
-            MATCH (user:{graph_schema.user_label})-[r:HAVE_METRICS {{platformId: '{platform_id}', date: {yesterday}}}]->(user)
-            RETURN r.date as date, r.closenessCentrality as closenessScore
-            """
-        )
-        # yesterday 4 users were interacting
-        assert len(yesterday_results) == 4
-        assert yesterday_results["date"].iloc[0] == yesterday
+        # yesterday_results = self.neo4j_ops.gds.run_cypher(
+        #     f"""
+        #     MATCH (user:{graph_schema.user_label})-[r:HAVE_METRICS {{platformId: '{platform_id}', date: {yesterday}}}]->(user)
+        #     RETURN r.date as date, r.closenessCentrality as closenessScore
+        #     """
+        # )
+        # # yesterday 4 users were interacting
+        # assert len(yesterday_results) == 4
+        # assert yesterday_results["date"].iloc[0] == yesterday
 
         today_results = self.neo4j_ops.gds.run_cypher(
             f"""

@@ -1,6 +1,6 @@
 # checking the past history of member activities
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from tc_analyzer_lib.algorithms.utils.member_activity_history_utils import (
     MemberActivityPastUtils,
@@ -106,11 +106,8 @@ def check_past_history(
         # db_analysis_start_date = None
         db_analysis_end_date = None
 
-    # # the input date_range in format of datetime
-    # # converting the dates into datetime format
-    # date_format = "%y/%m/%d"
-    # date_range_start = datetime.datetime.strptime(date_range[0], date_format)
-    # date_range_end = datetime.datetime.strptime(date_range[1], date_format)
+    if db_analysis_end_date:
+        db_analysis_end_date = db_analysis_end_date.replace(tzinfo=timezone.utc)
 
     new_date_range: list[datetime]
     # if for the requested date_range, its results were available in db

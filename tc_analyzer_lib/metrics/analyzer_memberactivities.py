@@ -138,6 +138,9 @@ class MemberActivities:
         if not from_start:
             # first date of storing the data
             first_storing_date = member_activity_c.get_last_date()
+            if first_storing_date:
+                first_storing_date = first_storing_date.replace(tzinfo=timezone.utc)
+
             activities = self.utils.refine_memberactivities_data(
                 activities, first_storing_date
             )

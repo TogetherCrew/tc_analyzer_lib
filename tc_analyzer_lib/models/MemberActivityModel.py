@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import logging
+from datetime import datetime
 
 import pymongo
 from tc_analyzer_lib.models.BaseModel import BaseModel
@@ -12,7 +13,7 @@ class MemberActivityModel(BaseModel):
             raise Exception("Database should not be None")
         super().__init__(collection_name="memberactivities", database=database)
 
-    def get_last_date(self):
+    def get_last_date(self) -> datetime | None:
         """
         Gets the date of the last document
         """

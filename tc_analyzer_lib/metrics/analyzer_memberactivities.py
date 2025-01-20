@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from tc_analyzer_lib.algorithms.compute_member_activity import compute_member_activity
 from tc_analyzer_lib.metrics.memberactivity_utils import MemberActivityUtils
@@ -73,7 +73,9 @@ class MemberActivities:
             return (None, None)
 
         # get date range to be analyzed
-        today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        today = datetime.now().replace(
+            hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc
+        )
 
         logging.info(f"{guild_msg} memberactivities Analysis started!")
 
@@ -87,7 +89,7 @@ class MemberActivities:
         load_past_data = load_past_data and not from_start
 
         first_date = self.analyzer_period.replace(
-            hour=0, minute=0, second=0, microsecond=0
+            hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc
         )
         if first_date is None:
             logging.error(

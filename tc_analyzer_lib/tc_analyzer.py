@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 
 from tc_analyzer_lib.metrics.analyzer_memberactivities import MemberActivities
 from tc_analyzer_lib.metrics.heatmaps import Heatmaps
@@ -105,7 +105,7 @@ class TCAnalyzer(AnalyzerDBManager):
             action_config=self.action,
             window_config=self.window,
             analyzer_config=self.analyzer_config,
-            analyzer_period=self.period,
+            analyzer_period=self.period.replace(tzinfo=timezone.utc),
         )
         (
             member_activities_data,
@@ -190,7 +190,7 @@ class TCAnalyzer(AnalyzerDBManager):
             action_config=self.action,
             window_config=self.window,
             analyzer_config=self.analyzer_config,
-            analyzer_period=self.period,
+            analyzer_period=self.period.replace(tzinfo=timezone.utc),
         )
         (
             member_activities_data,

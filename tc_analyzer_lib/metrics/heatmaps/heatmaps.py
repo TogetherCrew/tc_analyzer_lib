@@ -68,7 +68,11 @@ class Heatmaps:
         analytics_date: datetime
         if last_date is None or from_start:
             # Ensure self.period is offset-aware
-            analytics_date = self.period.replace(tzinfo=timezone.utc) if self.period.tzinfo is None else self.period
+            analytics_date = (
+                self.period.replace(tzinfo=timezone.utc)
+                if self.period.tzinfo is None
+                else self.period
+            )
         else:
             # Ensure last_date is offset-aware and add a day
             analytics_date = last_date.astimezone(timezone.utc) + timedelta(days=1)

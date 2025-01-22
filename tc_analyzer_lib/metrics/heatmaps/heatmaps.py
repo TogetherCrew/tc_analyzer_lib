@@ -1,5 +1,5 @@
 import logging
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from typing import Any
 
 from tc_analyzer_lib.metrics.heatmaps import AnalyticsHourly, AnalyticsRaw
@@ -67,9 +67,15 @@ class Heatmaps:
 
         analytics_date: datetime
         if last_date is None or from_start:
-            analytics_date = self.period
+            # Ensure self.period is offset-aware
+            analytics_date = (
+                self.period.replace(tzinfo=timezone.utc)
+                if self.period.tzinfo is None
+                else self.period
+            )
         else:
-            analytics_date = last_date + timedelta(days=1)
+            # Ensure last_date is offset-aware and add a day
+            analytics_date = last_date.astimezone(timezone.utc) + timedelta(days=1)
 
         # in order to skip bots
         bot_ids = []
@@ -81,10 +87,11 @@ class Heatmaps:
         heatmaps_results = []
 
         index = 0
-        max_index = (analytics_date - datetime.now()).days
-        while analytics_date.date() < datetime.now().date():
+        today = datetime.now(tz=timezone.utc)
+        max_index = (analytics_date - today).days
+        while analytics_date.date() < today.date():
             start_day = analytics_date.replace(
-                hour=0, minute=0, second=0, microsecond=0
+                hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc
             )
             end_day = start_day + timedelta(days=1)
             logging.info(

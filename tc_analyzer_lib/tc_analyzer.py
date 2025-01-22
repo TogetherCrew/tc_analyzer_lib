@@ -50,7 +50,7 @@ class TCAnalyzer(AnalyzerDBManager):
 
         self.platform_id = platform_id
         self.resources = resources
-        self.period = period.replace(tzinfo=timezone.utc)
+        self.period = period.astimezone(tz=timezone.utc)
         self.action = action
         self.window = window
         self.analyzer_config = analyzer_config

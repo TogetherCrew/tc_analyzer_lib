@@ -107,7 +107,7 @@ def check_past_history(
         db_analysis_end_date = None
 
     if db_analysis_end_date:
-        db_analysis_end_date = db_analysis_end_date.replace(tzinfo=timezone.utc)
+        db_analysis_end_date = db_analysis_end_date.astimezone(tz=timezone.utc)
 
     new_date_range: list[datetime]
     # if for the requested date_range, its results were available in db

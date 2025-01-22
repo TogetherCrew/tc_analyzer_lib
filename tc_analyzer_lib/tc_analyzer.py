@@ -50,7 +50,7 @@ class TCAnalyzer(AnalyzerDBManager):
 
         self.platform_id = platform_id
         self.resources = resources
-        self.period = period
+        self.period = period.replace(tzinfo=timezone.utc)
         self.action = action
         self.window = window
         self.analyzer_config = analyzer_config
@@ -105,7 +105,7 @@ class TCAnalyzer(AnalyzerDBManager):
             action_config=self.action,
             window_config=self.window,
             analyzer_config=self.analyzer_config,
-            analyzer_period=self.period.replace(tzinfo=timezone.utc),
+            analyzer_period=self.period,
         )
         (
             member_activities_data,
@@ -190,7 +190,7 @@ class TCAnalyzer(AnalyzerDBManager):
             action_config=self.action,
             window_config=self.window,
             analyzer_config=self.analyzer_config,
-            analyzer_period=self.period.replace(tzinfo=timezone.utc),
+            analyzer_period=self.period,
         )
         (
             member_activities_data,

@@ -67,9 +67,11 @@ class Heatmaps:
 
         analytics_date: datetime
         if last_date is None or from_start:
-            analytics_date = self.period
+            # Ensure self.period is offset-aware
+            analytics_date = self.period.replace(tzinfo=timezone.utc) if self.period.tzinfo is None else self.period
         else:
-            analytics_date = last_date.replace(tzinfo=timezone.utc) + timedelta(days=1)
+            # Ensure last_date is offset-aware and add a day
+            analytics_date = last_date.astimezone(timezone.utc) + timedelta(days=1)
 
         # in order to skip bots
         bot_ids = []
